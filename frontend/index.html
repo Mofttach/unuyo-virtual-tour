@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Virtual Tour Kampus UNU Yogyakarta - Jelajahi kampus secara virtual dengan teknologi 360°">
+    <title>Virtual Tour UNU Yogyakarta | Universitas Nahdlatul Ulama</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🕌</text></svg>">
+    
+    <!-- Pannellum CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css"/>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading-screen">
+        <div class="loading-content">
+            <div class="spinner"></div>
+            <h2>Memuat Virtual Tour...</h2>
+            <p>Mohon tunggu sebentar</p>
+        </div>
+    </div>
+
+    <!-- Top Navigation Bar -->
+    <header class="navbar">
+        <div class="navbar-brand">
+            <div class="logo">
+                <i class="fas fa-university"></i>
+            </div>
+            <div class="brand-text">
+                <h1>UNU YOGYAKARTA</h1>
+                <p>Virtual Tour 360°</p>
+            </div>
+        </div>
+        <nav class="navbar-menu">
+            <button class="nav-btn" id="toggle-gallery">
+                <i class="fas fa-images"></i> Galeri
+            </button>
+            <button class="nav-btn" id="toggle-info">
+                <i class="fas fa-info-circle"></i> Info
+            </button>
+            <button class="nav-btn" id="fullscreen-btn">
+                <i class="fas fa-expand"></i> Fullscreen
+            </button>
+        </nav>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-container">
+        <!-- Panorama Viewer (Center) -->
+        <div id="panorama-viewer"></div>
+
+        <!-- Info Panel (Right Side - Overlay) -->
+        <aside class="info-panel" id="info-panel">
+            <button class="close-btn" id="close-info">
+                <i class="fas fa-times"></i>
+            </button>
+            
+            <div class="info-content">
+                <div class="info-header">
+                    <h2 id="scene-title" class="scene-title">Loading...</h2>
+                    <div class="scene-meta">
+                        <span class="meta-item">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span id="scene-location">-</span>
+                        </span>
+                        <span class="meta-item">
+                            <i class="fas fa-calendar"></i>
+                            <span id="scene-date">-</span>
+                        </span>
+                        <span class="meta-item">
+                            <i class="fas fa-user"></i>
+                            <span id="scene-author">-</span>
+                        </span>
+                    </div>
+                </div>
+                
+                <div class="info-body">
+                    <p id="scene-description" class="scene-description">
+                        Memuat deskripsi...
+                    </p>
+                </div>
+
+                <div class="info-footer">
+                    <div class="navigation-hint">
+                        <h4><i class="fas fa-hand-pointer"></i> Cara Navigasi:</h4>
+                        <ul>
+                            <li><strong>Klik & Drag</strong> untuk melihat sekeliling</li>
+                            <li><strong>Scroll</strong> untuk zoom in/out</li>
+                            <li><strong>Klik Hotspot</strong> untuk pindah lokasi</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Thumbnail Gallery (Bottom - Overlay) -->
+        <section class="gallery-container" id="gallery-container">
+            <button class="close-btn gallery-close" id="close-gallery">
+                <i class="fas fa-times"></i>
+            </button>
+            
+            <div class="gallery-header">
+                <h3><i class="fas fa-images"></i> Lokasi Virtual Tour</h3>
+                <p>Klik thumbnail untuk menjelajahi lokasi</p>
+            </div>
+            
+            <div class="gallery-scroll">
+                <div id="thumbnail-gallery" class="thumbnail-grid">
+                    <!-- Thumbnails will be loaded here dynamically -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Welcome Overlay (First Visit) -->
+        <div class="welcome-overlay" id="welcome-overlay">
+            <div class="welcome-content">
+                <div class="welcome-icon">
+                    <i class="fas fa-university"></i>
+                </div>
+                <h1>Selamat Datang di Virtual Tour</h1>
+                <h2>UNU Yogyakarta</h2>
+                <p>Jelajahi kampus Universitas Nahdlatul Ulama Yogyakarta secara virtual dengan teknologi panorama 360°</p>
+                
+                <div class="welcome-features">
+                    <div class="feature">
+                        <i class="fas fa-vr-cardboard"></i>
+                        <span>Panorama 360°</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-route"></i>
+                        <span>Navigasi Interaktif</span>
+                    </div>
+                    <div class="feature">
+                        <i class="fas fa-info-circle"></i>
+                        <span>Informasi Lengkap</span>
+                    </div>
+                </div>
+                
+                <button class="welcome-btn" id="start-tour">
+                    <i class="fas fa-play"></i> Mulai Tur Virtual
+                </button>
+                
+                <p class="welcome-hint">
+                    <i class="fas fa-lightbulb"></i> 
+                    Tips: Gunakan mouse atau sentuh layar untuk melihat sekeliling
+                </p>
+            </div>
+        </div>
+
+        <!-- Control Hints -->
+        <div class="control-hints">
+            <div class="hint">
+                <i class="fas fa-mouse"></i>
+                <span>Drag untuk melihat</span>
+            </div>
+            <div class="hint">
+                <i class="fas fa-search-plus"></i>
+                <span>Scroll untuk zoom</span>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer Info -->
+    <footer class="footer">
+        <div class="footer-content">
+            <div class="footer-left">
+                <p>&copy; 2025 Universitas Nahdlatul Ulama Yogyakarta</p>
+            </div>
+            <div class="footer-right">
+                <a href="#" class="footer-link">
+                    <i class="fas fa-globe"></i> Website UNU
+                </a>
+                <a href="#" class="footer-link">
+                    <i class="fab fa-instagram"></i> Instagram
+                </a>
+                <a href="#" class="footer-link">
+                    <i class="fab fa-youtube"></i> YouTube
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Pannellum JS -->
+    <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="app.js"></script>
+</body>
+</html>
