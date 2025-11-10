@@ -1,380 +1,234 @@
-# 🕌 Virtual Tour UNU Yogyakarta
+````markdown
+# Virtual Tour UNU Yogyakarta
 
-Virtual tour interaktif 360° untuk Kampus Universitas Nahdlatul Ulama (UNU) Yogyakarta menggunakan Django REST Framework dan Pannellum.js.
+Virtual tour 360 derajat untuk Kampus Universitas Nahdlatul Ulama (UNU) Yogyakarta. Dibangun dengan Django REST Framework dan Pannellum.js.
 
-![Virtual Tour Preview](https://img.shields.io/badge/Status-Production%20Ready-success)
-![Django](https://img.shields.io/badge/Django-5.2.7-green)
-![Python](https://img.shields.io/badge/Python-3.14-blue)
-![License](https://img.shields.io/badge/License-MIT-yellow)
+## Fitur
 
-## 🎯 Fitur Utama
+- Panorama 360 derajat interaktif
+- Navigasi antar lokasi dengan hotspot
+- Info panel untuk setiap lokasi
+- Gallery thumbnail
+- Responsive design
+- RESTful API
+- Admin dashboard untuk manajemen konten
 
-✅ **Panorama 360° Interactive** - Jelajahi kampus dengan teknologi panorama equirectangular  
-✅ **Navigasi Hotspot** - Pindah antar lokasi dengan klik hotspot interaktif  
-✅ **Info Panel** - Deskripsi lengkap setiap lokasi kampus  
-✅ **Thumbnail Gallery** - Galeri visual semua lokasi  
-✅ **Responsive Design** - Mobile-friendly & desktop-optimized  
-✅ **RESTful API** - Backend Django dengan DRF  
-✅ **Admin Dashboard** - Kelola scene & hotspot dengan mudah  
-✅ **CORS Enabled** - Frontend terpisah dari backend  
+## Tech Stack
 
-## 📸 Screenshot
+**Backend:**
+- Django 5.2.7
+- Django REST Framework
+- SQLite (development)
+- Pillow (image processing)
 
-### Frontend - Virtual Tour Viewer
-- **Welcome Screen** dengan intro menarik
-- **Panorama Viewer** dengan kontrol Pannellum
-- **Info Panel** (slide dari kanan) dengan deskripsi lokasi
-- **Thumbnail Gallery** (slide dari bawah) untuk navigasi cepat
+**Frontend:**
+- Vanilla JavaScript
+- Pannellum.js 2.5.6
+- Tailwind CSS (CDN)
+- Font Awesome 6
 
-### Backend - Django Admin
-- Kelola Scene dengan inline Hotspot editor
-- Upload panorama & thumbnail images
-- Set featured scene, publish dates, dll
-
-## 🏗️ Teknologi Stack
-
-### Backend
-- **Django 5.2.7** - Web framework
-- **Django REST Framework** - API framework
-- **Pillow** - Image processing
-- **django-cors-headers** - CORS support
-- **SQLite** - Database (development)
-
-### Frontend
-- **Vanilla JavaScript (ES6+)** - No framework needed
-- **Pannellum.js 2.5.6** - 360° panorama viewer
-- **Font Awesome 6** - Icons
-- **Google Fonts** - Typography (Inter & Poppins)
-
-## 📁 Struktur Project
+## Struktur Project
 
 ```
 unuyo-virtual-tour/
-├── unu_tour/                    # Django project settings
-│   ├── settings.py             # Django configuration
-│   ├── urls.py                 # Main URL routing
-│   └── wsgi.py
-│
-├── tour_api/                    # Django app untuk API
-│   ├── models.py               # Scene & Hotspot models
-│   ├── serializers.py          # DRF serializers
-│   ├── views.py                # API ViewSets
-│   ├── urls.py                 # API endpoints
-│   ├── admin.py                # Admin configuration
-│   └── migrations/
-│
-├── frontend/                    # Frontend files (static)
-│   ├── index.html              # Main HTML page
-│   ├── style.css               # Responsive CSS
-│   └── app.js                  # JavaScript application
-│
-├── media/                       # User uploaded files
-│   ├── panoramas/              # 360° images (4096x2048)
-│   └── thumbnails/             # Thumbnail images (640x360)
-│
-├── db.sqlite3                   # SQLite database
-├── manage.py                    # Django management script
-├── generate_dummy_data.py       # Script untuk generate test data
-└── requirements.txt             # Python dependencies
+├── unu_tour/           # Django project settings
+├── tour_api/           # Django app (models, views, serializers)
+├── frontend/           # Frontend files (HTML, CSS, JS)
+├── media/              # Uploaded images
+│   ├── panoramas/      # 360 images
+│   └── thumbnails/     # Thumbnail images
+├── .env                # Environment variables (lokal)
+├── .env.example        # Template environment variables
+└── requirements.txt    # Python dependencies
 ```
 
-## 🚀 Installation & Setup
+## Quick Start
 
-### 1️⃣ Clone Repository
+### 1. Clone Repository
 ```bash
 git clone https://github.com/ulililzam/unuyo-virtual-tour.git
 cd unuyo-virtual-tour
 ```
 
-### 2️⃣ Create Virtual Environment
+### 2. Setup Environment
 ```bash
+# Create virtual environment
 python3 -m venv venv
 source venv/bin/activate  # macOS/Linux
-# atau
-venv\Scripts\activate     # Windows
-```
+# venv\Scripts\activate   # Windows
 
-### 3️⃣ Install Dependencies
-```bash
+# Install dependencies
 pip install -r requirements.txt
+
+# Setup environment variables
+cp .env.example .env
+# File .env sudah siap dengan konfigurasi development default
 ```
 
-Requirements:
-- Django==5.2.7
-- djangorestframework
-- django-cors-headers
-- Pillow
-- requests
-
-### 4️⃣ Run Migrations
+### 3. Database Setup
 ```bash
-python manage.py makemigrations
 python manage.py migrate
-```
-
-### 5️⃣ Create Superuser (Admin Access)
-```bash
 python manage.py createsuperuser
 ```
-- Username: `admin`
-- Email: `admin@unu.ac.id`
-- Password: (your choice)
 
-### 6️⃣ Generate Dummy Data (10 Lokasi Kampus)
+### 4. Generate Sample Data (Optional)
 ```bash
 python generate_dummy_data.py
 ```
+Script ini akan membuat 10 lokasi kampus dengan gambar placeholder.
 
-Script ini akan:
-- Download placeholder images dari picsum.photos
-- Create 10 scene locations (Gerbang Utama, Rektorat, Masjid, dll)
-- Generate hotspot navigations antar scene
-- Populate database dengan data menarik
-
-### 7️⃣ Run Development Server
+### 5. Run Server
 ```bash
 python manage.py runserver
 ```
 
-Server akan berjalan di: **http://127.0.0.1:8000**
+### 6. Access Application
 
-### 8️⃣ Akses Aplikasi
+- Backend API: http://127.0.0.1:8000/api/scenes/
+- Admin Panel: http://127.0.0.1:8000/admin/
+- Frontend: Buka `frontend/index.html` dengan Live Server (VS Code) atau web server lain
 
-| URL | Deskripsi |
-|-----|-----------|
-| `http://127.0.0.1:8000/admin/` | Django Admin Panel |
-| `http://127.0.0.1:8000/api/scenes/` | REST API - List Scenes |
-| `http://127.0.0.1:8000/api/scenes/featured/` | API - Featured Scene |
-| `http://127.0.0.1:8000/api/scenes/pannellum/` | API - Pannellum Config |
-| `frontend/index.html` | **Open with Live Server** |
+**Penting:** Jangan buka frontend dengan file:// karena CORS. Gunakan web server lokal.
 
-⚠️ **Penting**: Untuk membuka frontend, gunakan **Live Server** extension di VS Code atau web server lain. Jangan buka langsung file:// karena CORS.
+## API Endpoints
 
-## 🎮 Cara Menggunakan
-
-### Frontend (User)
-1. Buka `frontend/index.html` dengan Live Server
-2. Klik "Mulai Tur Virtual" pada welcome screen
-3. **Navigasi Panorama:**
-   - **Drag/Swipe** untuk melihat sekeliling
-   - **Scroll** untuk zoom in/out
-   - **Klik Hotspot** untuk pindah lokasi
-4. **Tombol Kontrol:**
-   - 🖼️ **Galeri** - Lihat semua lokasi
-   - ℹ️ **Info** - Baca deskripsi lokasi
-   - ⛶ **Fullscreen** - Mode layar penuh
-
-### Backend (Admin)
-1. Login ke: `http://127.0.0.1:8000/admin/`
-2. **Tambah Scene Baru:**
-   - Upload foto 360° (ratio 2:1, recommended: 4096x2048px)
-   - Upload thumbnail (ratio 16:9, recommended: 640x360px)
-   - Isi title, deskripsi, lokasi, tanggal
-   - Set featured scene (scene pertama yang muncul)
-3. **Tambah Hotspot:**
-   - Buka scene yang sudah dibuat
-   - Scroll ke bagian "Hotspots"
-   - Pilih tipe: Scene Link atau Info Point
-   - Set koordinat Pitch (-90 to 90) & Yaw (-180 to 180)
-   - Untuk Scene Link: pilih tujuan scene
-
-## 📡 API Endpoints
-
-### List All Scenes
+**List all scenes:**
 ```
 GET /api/scenes/
-
-Response:
-[
-  {
-    "id": 1,
-    "slug": "gerbang-utama-unu",
-    "title": "Gerbang Utama UNU Yogyakarta",
-    "thumbnail": "/media/thumbnails/...",
-    "location": "Sleman, Yogyakarta",
-    "published_date": "2025-11-04",
-    "is_featured": true
-  },
-  ...
-]
 ```
 
-### Get Scene Detail
+**Get scene detail:**
 ```
 GET /api/scenes/{slug}/
-
-Response:
-{
-  "id": 1,
-  "slug": "gerbang-utama-unu",
-  "title": "Gerbang Utama UNU Yogyakarta",
-  "description": "Selamat datang di...",
-  "location": "Sleman, Yogyakarta",
-  "published_date": "2025-11-04",
-  "author": "Tim Virtual Tour UNU",
-  "panorama_image": "/media/panoramas/...",
-  "thumbnail": "/media/thumbnails/...",
-  "initial_pitch": 0,
-  "initial_yaw": 0,
-  "initial_fov": 90,
-  "is_featured": true,
-  "hotspots": [
-    {
-      "id": 1,
-      "hotspot_type": "scene",
-      "to_scene_slug": "gedung-rektorat",
-      "to_scene_title": "Gedung Rektorat",
-      "text": "Ke Gedung Rektorat",
-      "pitch": 0,
-      "yaw": 45
-    }
-  ],
-  "created_at": "2025-11-04T..."
-}
 ```
 
-### Get Featured Scene
+**Get featured scene:**
 ```
 GET /api/scenes/featured/
-
-Response: (same as detail)
 ```
 
-### Get Pannellum Config (Ready to Use)
+**Get Pannellum config:**
 ```
 GET /api/scenes/pannellum/
-
-Response:
-{
-  "default": {
-    "firstScene": "gerbang-utama-unu",
-    "sceneFadeDuration": 1000,
-    "autoLoad": true
-  },
-  "scenes": {
-    "gerbang-utama-unu": {
-      "title": "Gerbang Utama...",
-      "author": "Tim Virtual Tour UNU",
-      "panorama": "/media/panoramas/...",
-      "pitch": 0,
-      "yaw": 0,
-      "hfov": 90,
-      "hotSpots": [...]
-    },
-    ...
-  }
-}
 ```
 
-## 🎨 Kustomisasi
+## Configuration
 
-### Ubah Warna Brand (CSS Variables)
-Edit `frontend/style.css`:
-```css
-:root {
-    --primary-color: #0a5f38;      /* UNU Green - Ganti sesuai brand */
-    --secondary-color: #f39c12;    /* Orange accent */
-    --accent-color: #e74c3c;       /* Red accent */
-}
+### Environment Variables
+
+File `.env` berisi konfigurasi penting:
+
+```env
+SECRET_KEY=your-secret-key
+DEBUG=True
+ALLOWED_HOSTS=localhost,127.0.0.1
+DB_ENGINE=sqlite
+DB_NAME=db.sqlite3
+CORS_ALLOWED_ORIGINS=http://localhost:5500,...
 ```
 
-### Ubah API URL (Production)
-Edit `frontend/app.js`:
+Untuk production, ubah:
+- `DEBUG=False`
+- Generate SECRET_KEY baru
+- Set ALLOWED_HOSTS dengan domain Anda
+- Gunakan PostgreSQL untuk database
+- Enable security settings
+
+Dokumentasi lengkap: `ENV_SETUP.md`
+
+### Frontend Configuration
+
+Edit `frontend/app.js` untuk mengubah API URL:
+
 ```javascript
 const CONFIG = {
-    API_BASE_URL: 'https://your-production-api.com/api',
+    apiBaseUrl: 'http://127.0.0.1:8000/api',  // Ubah untuk production
     // ...
 };
 ```
 
-### Tambah Lokasi Kampus Baru
-1. Login ke Django Admin
-2. Pergi ke "Scenes Virtual Tour"
-3. Klik "Add Scene"
-4. Upload images & isi data
-5. Save → Scene otomatis muncul di gallery
+## Cara Menggunakan
 
-## 📱 Responsive Breakpoints
+### Admin Panel
 
-- **Desktop**: > 1024px (Full layout dengan sidebar)
-- **Tablet**: 768px - 1024px (Compact navigation)
-- **Mobile**: < 768px (Full-width panels, stacked layout)
+1. Login: http://127.0.0.1:8000/admin/
+2. Tambah Scene: Upload foto 360 (ratio 2:1), thumbnail, isi data
+3. Tambah Hotspot: Set koordinat pitch/yaw, pilih tipe (scene link atau info)
 
-## 🔒 Security Notes
+### Frontend
 
-### Development (Current Setup)
-- `DEBUG = True` (disable di production!)
-- `CORS_ALLOWED_ORIGINS` whitelist (localhost)
-- SQLite database
+1. Buka `frontend/index.html` dengan Live Server
+2. Drag untuk melihat sekeliling, scroll untuk zoom
+3. Klik hotspot untuk navigasi atau info
 
-### Production Recommendations
-1. Set `DEBUG = False`
-2. Use PostgreSQL database
-3. Setup `ALLOWED_HOSTS`
-4. Use environment variables for secrets
-5. Setup static files serving (nginx/Apache)
-6. Use CDN for media files (Cloudinary/S3)
-7. Enable HTTPS
+## Production Deployment
 
-## 🚢 Deployment
+### Backend (Django)
 
-### Deploy Backend (Django)
-Recommended platforms:
-- **Render.com** (Free tier available)
-- **Railway.app**
-- **PythonAnywhere**
-- **Heroku**
-
-### Deploy Frontend
-Recommended platforms:
-- **Netlify** (Drag & drop `frontend/` folder)
-- **Vercel**
-- **GitHub Pages**
-
-### Media Files (Production)
-⚠️ **Jangan upload media ke Render/Heroku** (will be deleted)
-
-Use cloud storage:
-1. **Cloudinary** (Recommended - Free 25GB)
-   ```bash
-   pip install django-cloudinary-storage
-   ```
-2. **Amazon S3**
-3. **Google Cloud Storage**
-
-## 🐛 Troubleshooting
-
-### ❌ CORS Error di Browser
-**Problem**: `Access to fetch blocked by CORS policy`
-
-**Solution**:
-1. Check `CORS_ALLOWED_ORIGINS` di `settings.py`
-2. Pastikan frontend URL ada di list
-3. Restart Django server
-
-### ❌ Images Not Loading
-**Problem**: Panorama atau thumbnail tidak muncul
-
-**Solution**:
-1. Check `MEDIA_URL` dan `MEDIA_ROOT` di `settings.py`
-2. Pastikan file ada di folder `media/`
-3. Check browser console untuk error URL
-
-### ❌ No Scenes Found
-**Problem**: "Tidak ada scene yang tersedia"
-
-**Solution**:
+1. Generate SECRET_KEY baru:
 ```bash
-python generate_dummy_data.py
+python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'
 ```
 
-### ❌ API 404 Not Found
-**Problem**: Endpoint `/api/scenes/` return 404
+2. Edit `.env` untuk production:
+```env
+SECRET_KEY=<generated-key>
+DEBUG=False
+ALLOWED_HOSTS=yourdomain.com
+DB_ENGINE=postgresql
+SECURE_SSL_REDIRECT=True
+SESSION_COOKIE_SECURE=True
+CSRF_COOKIE_SECURE=True
+```
 
-**Solution**:
-1. Check `tour_api` ada di `INSTALLED_APPS`
-2. Check `path('api/', include('tour_api.urls'))` di `unu_tour/urls.py`
-3. Restart server
+3. Setup database (PostgreSQL recommended)
+4. Collect static files: `python manage.py collectstatic`
+5. Deploy ke Render, Railway, atau platform lain
+
+### Frontend
+
+- Deploy `frontend/` folder ke Netlify, Vercel, atau GitHub Pages
+- Update API URL di `app.js`
+
+### Media Files
+
+Gunakan cloud storage untuk production:
+- Cloudinary (recommended)
+- Amazon S3
+- Google Cloud Storage
+
+## Troubleshooting
+
+**CORS Error:**
+- Gunakan Live Server, jangan buka file:// langsung
+- Check `CORS_ALLOWED_ORIGINS` di `.env`
+
+**Images not loading:**
+- Check file ada di `media/panoramas/` dan `media/thumbnails/`
+- Verify MEDIA_URL di settings.py
+
+**No scenes found:**
+- Run: `python generate_dummy_data.py`
+
+**API 404:**
+- Check `tour_api` ada di INSTALLED_APPS
+- Restart server
+
+## License
+
+MIT License
+
+## Credits
+
+- Pannellum.js - 360 panorama viewer
+- Django & Django REST Framework
+- Tailwind CSS
+- Font Awesome
+
+---
+
+Developed by Universitas Nahdlatul Ulama Yogyakarta
+````
 
 ## 📝 To-Do / Future Enhancements
 
