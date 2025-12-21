@@ -1,6 +1,7 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from .models import Scene, Hotspot
 from .serializers import (
@@ -12,15 +13,19 @@ from .serializers import (
 
 class SceneViewSet(viewsets.ReadOnlyModelViewSet):
     """
-    API ViewSet untuk Virtual Tour Scenes
+    Enhanced API ViewSet untuk Virtual Tour Scenes dengan floor navigation
     
     Endpoints:
-    - GET /api/scenes/          : List semua scene (untuk galeri)
-    - GET /api/scenes/{slug}/   : Detail 1 scene
-    - GET /api/scenes/featured/ : Get featured scene (scene pertama)
-    - GET /api/scenes/pannellum/: Get full Pannellum config JSON
+    - GET /api/scenes/               : List semua scene (untuk galeri)
+    - GET /api/scenes/?floor=1       : Filter by floor number
+    - GET /api/scenes/?building=...  : Filter by building name
+    - GET /api/scenes/{slug}/        : Detail 1 scene
+    - GET /api/scenes/featured/      : Get featured scene (starting point)
+    - GET /api/scenes/floors/        : Get list of floors with scene count
+    - GET /api/scenes/buildings/     : Get list of buildings with scene count
+    - GET /api/scenes/pannellum/     : Get full Pannellum config JSON
     """
-    queryset = Scene.objects.filter(is_active=True)
+    queryset = Scene.objects.filter(is_active=True).select_related().prefetch_related('hotspots', 'hotspots__to_scene')
     lookup_field = 'slug'
     
     def get_serializer_class(self):
@@ -29,10 +34,26 @@ class SceneViewSet(viewsets.ReadOnlyModelViewSet):
             return SceneListSerializer
         return SceneDetailSerializer
     
+    def get_queryset(self):
+        """Enhanced queryset with floor and building filtering"""
+        queryset = super().get_queryset()
+        
+        # Filter by floor
+        floor = self.request.query_params.get('floor')
+        if floor:
+            queryset = queryset.filter(floor=floor)
+        
+        # Filter by building
+        building = self.request.query_params.get('building')
+        if building:
+            queryset = queryset.filter(building=building)
+        
+        return queryset
+    
     @action(detail=False, methods=['get'])
     def featured(self, request):
         """
-        Endpoint untuk mendapatkan featured scene (scene pertama kali dibuka)
+        Endpoint untuk mendapatkan featured scene (starting point)
         
         GET /api/scenes/featured/
         """
@@ -50,6 +71,51 @@ class SceneViewSet(viewsets.ReadOnlyModelViewSet):
         
         serializer = SceneDetailSerializer(scene, context={'request': request})
         return Response(serializer.data)
+    
+    @action(detail=False, methods=['get'])
+    def floors(self, request):
+        """
+        Get all floors with scene count
+        
+        GET /api/scenes/floors/
+        GET /api/scenes/floors/?building=Gedung Utama
+        
+        Response:
+        [
+            {"floor": 1, "floor_description": "Lobby & Ruang Kuliah", "scene_count": 5},
+            {"floor": 2, "floor_description": "Laboratorium", "scene_count": 3}
+        ]
+        """
+        building = request.query_params.get('building')
+        
+        queryset = Scene.objects.filter(is_active=True, floor__isnull=False)
+        if building:
+            queryset = queryset.filter(building=building)
+        
+        floors = queryset.values('floor', 'floor_description').annotate(
+            scene_count=Count('id')
+        ).order_by('floor')
+        
+        return Response(floors)
+    
+    @action(detail=False, methods=['get'])
+    def buildings(self, request):
+        """
+        Get all buildings with scene count
+        
+        GET /api/scenes/buildings/
+        
+        Response:
+        [
+            {"building": "Gedung Utama", "scene_count": 20},
+            {"building": "Gedung A", "scene_count": 10}
+        ]
+        """
+        buildings = Scene.objects.filter(is_active=True).values('building').annotate(
+            scene_count=Count('id')
+        ).order_by('building')
+        
+        return Response(buildings)
     
     @action(detail=False, methods=['get'])
     def pannellum(self, request):

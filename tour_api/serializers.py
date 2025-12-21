@@ -22,7 +22,8 @@ class HotspotSerializer(serializers.ModelSerializer):
 
 
 class SceneListSerializer(serializers.ModelSerializer):
-    """Serializer untuk list view - dipakai di galeri thumbnail"""
+    """Serializer untuk list view - dipakai di galeri thumbnail dengan floor info"""
+    location_label = serializers.ReadOnlyField()
     
     class Meta:
         model = Scene
@@ -30,7 +31,11 @@ class SceneListSerializer(serializers.ModelSerializer):
             'id', 
             'slug', 
             'title', 
-            'thumbnail', 
+            'thumbnail',
+            'building',
+            'floor',
+            'floor_description',
+            'location_label',
             'location',
             'published_date',
             'is_featured'
@@ -40,6 +45,7 @@ class SceneListSerializer(serializers.ModelSerializer):
 class SceneDetailSerializer(serializers.ModelSerializer):
     """Serializer untuk detail view - data lengkap untuk viewer"""
     hotspots = HotspotSerializer(many=True, read_only=True)
+    location_label = serializers.ReadOnlyField()
     
     # URL fields (akan otomatis resolve ke full URL)
     panorama_image = serializers.ImageField(use_url=True)
@@ -51,7 +57,11 @@ class SceneDetailSerializer(serializers.ModelSerializer):
             'id', 
             'slug', 
             'title', 
-            'description', 
+            'description',
+            'building',
+            'floor',
+            'floor_description',
+            'location_label',
             'location', 
             'published_date', 
             'author',

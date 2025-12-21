@@ -1,14 +1,16 @@
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="description" content="Virtual Tour Kampus UNU Yogyakarta - Jelajahi kampus secara virtual dengan teknologi 360°">
+    <meta name="description"
+        content="Virtual Tour Kampus UNU Yogyakarta - Jelajahi kampus secara virtual dengan teknologi 360°">
     <title>Virtual Tour - UNU Yogyakarta</title>
-    
+
     <!-- Favicon -->
     <link rel="icon" type="image/png" href="logo-unu.png">
-    
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -28,34 +30,51 @@
             }
         }
     </script>
-    
+
     <!-- Pannellum CSS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css"/>
-    
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css" />
+
     <!-- Custom Hotspot Styles -->
-    <link rel="stylesheet" href="hotspot-styles.css">
-    
+    <link rel="stylesheet" href="hotspot-styles.css?v=2.3">
+
+    <!-- Intro Animation Styles -->
+    <link rel="stylesheet" href="css/intro-animation.css">
+
+    <!-- Professional Viewer UI (Amikom + BINUS Style) -->
+    <link rel="stylesheet" href="css/viewer-header.css">
+    <link rel="stylesheet" href="css/thumbnail-nav.css?v=2.1">
+    <link rel="stylesheet" href="css/scene-menu.css">
+    <link rel="stylesheet" href="css/zoom-controls.css">
+    <link rel="stylesheet" href="css/info-popup.css?v=1.3">
+
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-    
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
+
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+
     <style>
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
-        
+
         body {
             font-family: 'Inter', sans-serif;
         }
-        
-        h1, h2, h3, h4, h5, h6 {
+
+        h1,
+        h2,
+        h3,
+        h4,
+        h5,
+        h6 {
             font-family: 'Poppins', sans-serif;
         }
-        
+
         /* Hero Background with Image Zoom Animation and Pan */
         .hero-section {
             position: relative;
@@ -66,11 +85,11 @@
             justify-content: center;
             cursor: grab;
         }
-        
+
         .hero-section:active {
             cursor: grabbing;
         }
-        
+
         .hero-bg {
             position: absolute;
             top: -10%;
@@ -85,17 +104,20 @@
             transform: translateY(50px) scale(1.15);
             will-change: transform;
         }
-        
+
         /* Remove auto zoom animation */
         @keyframes zoomInOut {
-            0%, 100% {
+
+            0%,
+            100% {
                 transform: scale(1);
             }
+
             50% {
                 transform: scale(1.1);
             }
         }
-        
+
         /* Dark overlay for better text readability */
         .hero-overlay {
             position: absolute;
@@ -103,33 +125,31 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(
-                to bottom,
-                rgba(0, 0, 0, 0.75) 0%,
-                rgba(0, 0, 0, 0.6) 50%,
-                rgba(0, 0, 0, 0.75) 100%
-            );
+            background: linear-gradient(to bottom,
+                    rgba(0, 0, 0, 0.75) 0%,
+                    rgba(0, 0, 0, 0.6) 50%,
+                    rgba(0, 0, 0, 0.75) 100%);
         }
-        
+
         .hero-content {
             position: relative;
             z-index: 10;
             margin-top: -5vh;
         }
-        
+
         /* Responsive hero content */
         @media (max-width: 1024px) {
             .hero-content {
                 margin-top: -3vh;
             }
         }
-        
+
         @media (max-width: 768px) {
             .hero-content {
                 margin-top: -2vh;
             }
         }
-        
+
         /* Logo Fixed Top Left */
         .logo-fixed {
             position: fixed;
@@ -138,11 +158,11 @@
             z-index: 50;
             transition: transform 0.3s ease;
         }
-        
+
         .logo-fixed:hover {
             transform: scale(1.05);
         }
-        
+
         /* PMB Button Fixed Top Right */
         .pmb-button-fixed {
             position: fixed;
@@ -161,20 +181,20 @@
             text-decoration: none;
             display: inline-block;
         }
-        
+
         .pmb-button-fixed:hover,
         .pmb-button-fixed:active {
             background: #d4af37;
             color: #000;
         }
-        
+
         /* Mobile adjustments */
         @media (max-width: 768px) {
             .logo-fixed {
                 top: 1rem;
                 left: 1rem;
             }
-            
+
             .pmb-button-fixed {
                 top: 1rem;
                 right: 1rem;
@@ -182,7 +202,7 @@
                 font-size: 0.75rem;
             }
         }
-        
+
         /* Gold Button - Smaller size */
         .btn-gold {
             background: linear-gradient(135deg, #d4af37, #f0c674);
@@ -199,12 +219,12 @@
             cursor: pointer;
             font-size: 0.95rem;
         }
-        
+
         .btn-gold:hover {
             box-shadow: 0 6px 30px rgba(212, 175, 55, 0.6);
             transform: translateY(-2px);
         }
-        
+
         /* Responsive button */
         @media (max-width: 768px) {
             .btn-gold {
@@ -212,12 +232,12 @@
                 font-size: 0.85rem;
             }
         }
-        
+
         /* Logo Glow */
         .logo-gold {
             filter: drop-shadow(0 0 20px rgba(212, 175, 55, 0.6));
         }
-        
+
         /* Virtual Tour Badge - Minimal Style */
         .tour-badge {
             background: rgba(255, 255, 255, 0.15);
@@ -230,50 +250,51 @@
             letter-spacing: 2px;
             display: inline-block;
         }
-        
+
         #panorama-viewer {
             width: 100%;
             height: 100%;
         }
-        
+
         /* Smooth scroll */
         html {
             scroll-behavior: smooth;
         }
-        
+
         /* Responsive Typography */
         @media (max-width: 768px) {
             .hero-content h1 {
                 font-size: 1.75rem !important;
                 line-height: 1.3;
             }
-            
+
             .hero-content .logo-gold {
                 height: 4rem !important;
             }
         }
-        
+
         @media (max-width: 480px) {
             .hero-content h1 {
                 font-size: 1.5rem !important;
             }
-            
+
             .hero-content .logo-gold {
                 height: 3.5rem !important;
             }
         }
     </style>
 </head>
+
 <body class="bg-white">
 
     <!-- Landing Page -->
     <div id="landing-page">
-        
+
         <!-- Logo Fixed Top Left -->
         <a href="https://unu-jogja.ac.id" target="_blank" class="logo-fixed">
             <img src="logo-unu.png" alt="Logo UNU Yogyakarta" class="h-12 md:h-14 lg:h-16 w-auto logo-gold">
         </a>
-        
+
         <!-- PMB Button Fixed Top Right -->
         <a href="https://pmb.unu-jogja.ac.id" target="_blank" class="pmb-button-fixed">
             PMB UNU
@@ -283,10 +304,10 @@
         <section class="hero-section">
             <!-- Background Image with Zoom Animation -->
             <div class="hero-bg"></div>
-            
+
             <!-- Dark Overlay -->
             <div class="hero-overlay"></div>
-            
+
             <!-- Hero Content -->
             <div class="hero-content max-w-5xl mx-auto text-center text-white px-6">
                 <!-- Logo UNU & Member - Side by Side -->
@@ -294,19 +315,21 @@
                     <!--<img src="logo-unu.png" alt="Logo UNU Yogyakarta" class="h-20 md:h-24 lg:h-30 w-auto logo-gold opacity-90">-->
                     <!--<img src="member-logo-gold.png" alt="Member Logo" class="h-20 md:h-24 lg:h-24 w-auto logo-gold opacity-90">-->
                 </div>
-                
+
                 <!-- Main Tagline - Simple & Light Weight -->
-                <h1 class="text-3xl md:text-5xl lg:text-6xl mb-6 leading-tight" style="font-weight: 300; letter-spacing: 0.02em;">
-                    Start Your Virtual Exploration<br/>of UNU Yogyakarta.
+                <h1 class="text-3xl md:text-5xl lg:text-6xl mb-6 leading-tight"
+                    style="font-weight: 300; letter-spacing: 0.02em;">
+                    Start Your Virtual Exploration<br />of UNU Yogyakarta.
                 </h1>
-                
+
                 <!-- 360 Badge - Text Only (No Box) -->
                 <div class="mb-8">
-                    <span class="text-sm tracking-widest font-light" style="letter-spacing: 0.2em;">360° VIRTUAL TOUR</span>
+                    <span class="text-sm tracking-widest font-light" style="letter-spacing: 0.2em;">360° VIRTUAL
+                        TOUR</span>
                 </div>
-                
-                <!-- CTA Button -->
-                <button onclick="scrollToGallery()" class="btn-gold text-sm tracking-wide">
+
+                <!-- CTA Button - Direct to featured scene (no intro animation) -->
+                <button onclick="openFeaturedScene(false)" class="btn-gold text-sm tracking-wide">
                     EXPLORE THE CAMPUS
                 </button>
             </div>
@@ -320,13 +343,15 @@
                         Jelajahi Kampus Secara Virtual
                     </h2>
                     <p class="text-gray-600 text-lg max-w-2xl mx-auto">
-                        Pengalaman imersif dengan teknologi panorama 360° untuk mengenal lebih dekat kampus UNU Yogyakarta
+                        Pengalaman imersif dengan teknologi panorama 360° untuk mengenal lebih dekat kampus UNU
+                        Yogyakarta
                     </p>
                 </div>
-                
+
                 <div class="grid md:grid-cols-3 gap-8">
                     <div class="text-center p-6">
-                        <div class="w-20 h-20 bg-gradient-to-br from-unu-gold to-yellow-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                        <div
+                            class="w-20 h-20 bg-gradient-to-br from-unu-gold to-yellow-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
                             <i class="fas fa-vr-cardboard text-3xl text-white"></i>
                         </div>
                         <h3 class="text-xl font-bold mb-3 text-gray-900">Panorama 360°</h3>
@@ -334,9 +359,10 @@
                             Teknologi interaktif untuk melihat sekeliling dengan bebas
                         </p>
                     </div>
-                    
+
                     <div class="text-center p-6">
-                        <div class="w-20 h-20 bg-gradient-to-br from-unu-gold to-yellow-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                        <div
+                            class="w-20 h-20 bg-gradient-to-br from-unu-gold to-yellow-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
                             <i class="fas fa-map-marked-alt text-3xl text-white"></i>
                         </div>
                         <h3 class="text-xl font-bold mb-3 text-gray-900">Berbagai Lokasi</h3>
@@ -344,9 +370,10 @@
                             Kunjungi setiap sudut kampus dari gedung hingga fasilitas
                         </p>
                     </div>
-                    
+
                     <div class="text-center p-6">
-                        <div class="w-20 h-20 bg-gradient-to-br from-unu-gold to-yellow-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
+                        <div
+                            class="w-20 h-20 bg-gradient-to-br from-unu-gold to-yellow-600 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
                             <i class="fas fa-info-circle text-3xl text-white"></i>
                         </div>
                         <h3 class="text-xl font-bold mb-3 text-gray-900">Informasi Lengkap</h3>
@@ -369,7 +396,7 @@
                         Klik pada gambar untuk memulai virtual tour 360°
                     </p>
                 </div>
-                
+
                 <div id="gallery-grid" class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
                     <!-- Gallery items will be loaded here -->
                 </div>
@@ -392,31 +419,35 @@
                             Universitas Nahdlatul Ulama Yogyakarta
                         </p>
                     </div>
-                    
+
                     <div>
                         <h4 class="font-bold mb-3">Tautan</h4>
                         <ul class="space-y-2 text-sm text-gray-400">
-                            <li><a href="https://www.unu-jogja.ac.id/id" target="_blank" class="hover:text-unu-gold transition-colors">Website Resmi</a></li>
+                            <li><a href="https://www.unu-jogja.ac.id/id" target="_blank"
+                                    class="hover:text-unu-gold transition-colors">Website Resmi</a></li>
                             <li><a href="#gallery-section" class="hover:text-unu-gold transition-colors">Galeri</a></li>
                         </ul>
                     </div>
-                    
+
                     <div>
                         <h4 class="font-bold mb-3">Ikuti Kami</h4>
                         <div class="flex gap-3">
-                            <a href="#" class="w-10 h-10 bg-white/10 hover:bg-unu-gold rounded-lg flex items-center justify-center transition-all">
+                            <a href="#"
+                                class="w-10 h-10 bg-white/10 hover:bg-unu-gold rounded-lg flex items-center justify-center transition-all">
                                 <i class="fab fa-instagram"></i>
                             </a>
-                            <a href="#" class="w-10 h-10 bg-white/10 hover:bg-unu-gold rounded-lg flex items-center justify-center transition-all">
+                            <a href="#"
+                                class="w-10 h-10 bg-white/10 hover:bg-unu-gold rounded-lg flex items-center justify-center transition-all">
                                 <i class="fab fa-youtube"></i>
                             </a>
-                            <a href="#" class="w-10 h-10 bg-white/10 hover:bg-unu-gold rounded-lg flex items-center justify-center transition-all">
+                            <a href="#"
+                                class="w-10 h-10 bg-white/10 hover:bg-unu-gold rounded-lg flex items-center justify-center transition-all">
                                 <i class="fab fa-facebook"></i>
                             </a>
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="border-t border-white/10 pt-6 text-center text-sm text-gray-500">
                     &copy; 2025 Universitas Nahdlatul Ulama Yogyakarta
                 </div>
@@ -427,58 +458,92 @@
 
     <!-- Virtual Tour Viewer (Hidden by default) -->
     <div id="tour-viewer" class="hidden fixed inset-0 z-50 bg-black">
-        
-        <!-- Top Bar -->
-        <div class="absolute top-0 left-0 right-0 h-16 navbar-dark flex items-center justify-between px-6 z-10">
-            <div class="flex items-center gap-3">
-                <img src="gold-unu.png" alt="Logo UNU" class="h-10 w-auto logo-gold">
-                <span class="text-white font-medium">Virtual Tour UNU Yogyakarta</span>
-            </div>
-            <button 
-                onclick="closeTour()"
-                class="px-4 py-2 bg-white/10 hover:bg-unu-gold hover:text-black text-white rounded-lg transition-all flex items-center gap-2"
-            >
-                <i class="fas fa-arrow-left"></i>
-                <span>Kembali</span>
-            </button>
-        </div>
 
         <!-- Main Content -->
-        <div class="absolute top-16 bottom-0 left-0 right-0 flex">
-            
+        <div class="absolute inset-0 flex">
+
             <!-- Panorama Viewer -->
             <div class="flex-1 relative">
+                <!-- Professional Header Overlay (Amikom Style) -->
+                <div class="viewer-header">
+                    <!-- Left: Hamburger Menu -->
+                    <div style="position: relative;">
+                        <button class="menu-toggle" id="menu-toggle" onclick="toggleSceneMenu()">
+                            <div class="hamburger-line"></div>
+                            <div class="hamburger-line"></div>
+                            <div class="hamburger-line"></div>
+                        </button>
+
+                        <!-- Dropdown Menu -->
+                        <div class="scene-menu-dropdown" id="scene-menu-dropdown">
+                            <!-- Populated dynamically -->
+                        </div>
+                    </div>
+
+                    <!-- Center: Scene Title -->
+                    <div class="scene-title-badge" id="location-badge" style="display: none;">
+                        Loading...
+                    </div>
+
+                    <!-- Right: Close Button Only -->
+                    <button class="close-button" onclick="closeTour()" title="Close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+
+                <!-- Zoom & Fullscreen Controls - Right Side, Below Navbar -->
+                <div class="zoom-controls">
+                    <button class="zoom-btn" onclick="zoomIn()" title="Zoom In">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <button class="zoom-btn" onclick="zoomOut()" title="Zoom Out">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <button class="zoom-btn" onclick="toggleFullscreen()" title="Fullscreen">
+                        <i class="fas fa-expand"></i>
+                    </button>
+                    <button class="zoom-btn" onclick="toggleInfoPopup()" title="Info Lokasi">
+                        <i class="fas fa-info"></i>
+                    </button>
+                </div>
+
                 <div id="panorama-viewer"></div>
-                
+
                 <!-- Loading Indicator -->
                 <div id="viewer-loading" class="absolute inset-0 bg-black/80 flex items-center justify-center">
                     <div class="text-center text-white">
-                        <div class="w-16 h-16 border-4 border-white/20 border-t-unu-gold rounded-full animate-spin mx-auto mb-4"></div>
+                        <div
+                            class="w-16 h-16 border-4 border-white/20 border-t-unu-gold rounded-full animate-spin mx-auto mb-4">
+                        </div>
                         <p class="text-lg">Memuat panorama...</p>
                     </div>
                 </div>
+
+                <!-- Old Thumbnail Nav Removed -->
             </div>
 
-            <!-- Info Sidebar -->
-            <div class="w-96 bg-gradient-to-b from-gray-900 to-black overflow-y-auto">
+            <!-- Info Sidebar - HIDDEN -->
+            <div id="info-sidebar"
+                class="w-96 bg-gradient-to-b from-gray-900 to-black overflow-y-auto hidden transition-all duration-300">
                 <div class="p-6">
                     <h2 id="viewer-title" class="text-2xl font-bold text-white mb-3">
                         Loading...
                     </h2>
-                    
+
                     <div class="flex items-center gap-2 text-sm text-gray-400 mb-4">
                         <i class="fas fa-map-marker-alt text-red-400"></i>
                         <span id="viewer-location">-</span>
                     </div>
-                    
+
                     <div class="border-t border-white/10 pt-4 mb-4">
                         <p class="text-xs text-gray-500 mb-1">Dipublikasikan:</p>
                         <p class="text-sm text-gray-300" id="viewer-date">-</p>
                     </div>
-                    
+
                     <div class="border-t border-white/10 pt-4">
                         <h3 class="text-sm font-semibold text-gray-300 mb-3">Deskripsi:</h3>
-                        <p id="viewer-description" class="text-gray-400 leading-relaxed text-justify whitespace-pre-wrap">
+                        <p id="viewer-description"
+                            class="text-gray-400 leading-relaxed text-justify whitespace-pre-wrap">
                             Loading...
                         </p>
                     </div>
@@ -497,6 +562,21 @@
                 </div>
             </div>
 
+            <!-- Thumbnail Navigation -->
+            <div class="thumbnail-nav-container">
+                <div class="thumbnail-scroll-wrapper">
+                    <button class="nav-arrow left" onclick="scrollThumbnails(-1)">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <div class="thumbnail-list" id="thumbnail-list">
+                        <!-- Thumbnails injected by JS -->
+                    </div>
+                    <button class="nav-arrow right" onclick="scrollThumbnails(1)">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -504,7 +584,7 @@
     <div id="loading-screen" class="hidden fixed inset-0 z-[100] flex items-center justify-center">
         <!-- Gradient Background Overlay -->
         <div class="absolute inset-0 bg-gradient-to-br from-unu-dark via-unu-primary to-black opacity-95"></div>
-        
+
         <!-- Loading Content -->
         <div class="relative text-center text-white z-10 px-6">
             <!-- Animated Logo Icon -->
@@ -518,15 +598,16 @@
                     </div>
                 </div>
             </div>
-            
+
             <!-- Loading Text -->
-            <h2 class="text-3xl md:text-4xl font-semibold mb-3" style="font-family: 'Poppins', sans-serif; font-weight: 300; letter-spacing: 0.02em;">
+            <h2 class="text-3xl md:text-4xl font-semibold mb-3"
+                style="font-family: 'Poppins', sans-serif; font-weight: 300; letter-spacing: 0.02em;">
                 Memuat Virtual Tour
             </h2>
             <p class="text-white/70 text-sm md:text-base font-light tracking-wide" style="letter-spacing: 0.1em;">
                 MOHON TUNGGU SEBENTAR
             </p>
-            
+
             <!-- Progress Dots -->
             <div class="flex items-center justify-center gap-2 mt-6">
                 <div class="w-2 h-2 bg-unu-gold rounded-full animate-pulse" style="animation-delay: 0s;"></div>
@@ -536,20 +617,92 @@
         </div>
     </div>
 
+    <!-- Info Popup (New Design) -->
+    <div id="info-popup" class="info-popup-overlay">
+        <div class="info-popup-container">
+            <div class="info-popup-header">
+                <h3 class="info-popup-title" id="popup-title">Scene Name</h3>
+                <button class="info-popup-close" onclick="toggleInfoPopup()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="info-popup-body" id="popup-description">
+                Description goes here...
+            </div>
+        </div>
+    </div>
+
+    <!-- Thumbnail Navigation (Moved inside tour-viewer) -->
+    <!-- Removed from here -->
+
     <!-- Pannellum JS -->
     <script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
-    
+
+    <script>
+        // Zoom control functions - INLINE (Django routing workaround)
+        window.zoomIn = function () {
+            console.log('🔍 Zoom In clicked!');
+            if (window.state && window.state.viewer) {
+                const hfov = window.state.viewer.getHfov();
+                window.state.viewer.setHfov(Math.max(hfov - 10, 50));
+            } else {
+                console.error('❌ Viewer not initialized!');
+            }
+        };
+        window.zoomOut = function () {
+            console.log('🔍 Zoom Out clicked!');
+            if (window.state && window.state.viewer) {
+                const hfov = window.state.viewer.getHfov();
+                window.state.viewer.setHfov(Math.min(hfov + 10, 120));
+            } else {
+                console.error('❌ Viewer not initialized!');
+            }
+        };
+        window.toggleFullscreen = function () {
+            console.log('🖥️ Fullscreen clicked!');
+            if (window.state && window.state.viewer) {
+                window.state.viewer.toggleFullscreen();
+            } else {
+                console.error('❌ Viewer not initialized!');
+            }
+        };
+
+        // Toggle Info Sidebar
+        // Toggle Info Popup (New)
+        window.toggleInfoPopup = function () {
+            console.log('ℹ️ Info Popup clicked!');
+            const popup = document.getElementById('info-popup');
+            const titleEl = document.getElementById('popup-title');
+            const descEl = document.getElementById('popup-description');
+
+            if (popup) {
+                // Populate data if opening
+                if (!popup.classList.contains('active')) {
+                    if (window.state && window.state.currentScene) {
+                        if (titleEl) titleEl.textContent = window.state.currentScene.title || 'Unknown Location';
+                        if (descEl) descEl.textContent = window.state.currentScene.description || 'No description available.';
+                    }
+                }
+                popup.classList.toggle('active');
+            }
+        };
+
+        // Map old function to new one for compatibility
+        window.toggleInfoSidebar = window.toggleInfoPopup;
+        console.log('✅ Zoom functions defined inline');
+    </script>
+
     <!-- Custom JS -->
-    <script src="app.js?v=4.6"></script>
-    
+    <script src="app.js?v=5.2"></script>
+
     <script>
         // Helper functions
         function scrollToGallery() {
-            document.getElementById('gallery-section').scrollIntoView({ 
-                behavior: 'smooth' 
+            document.getElementById('gallery-section').scrollIntoView({
+                behavior: 'smooth'
             });
         }
-        
+
         function closeTour() {
             document.getElementById('tour-viewer').classList.add('hidden');
             document.getElementById('landing-page').classList.remove('hidden');
@@ -558,97 +711,97 @@
                 window.currentViewer = null;
             }
         }
-        
+
         // Hero Background Pan/Drag Functionality
-        (function() {
+        (function () {
             const heroSection = document.querySelector('.hero-section');
             const heroBg = document.querySelector('.hero-bg');
-            
+
             if (!heroSection || !heroBg) return;
-            
+
             let isDragging = false;
             let startX, startY;
             let currentX = 0, currentY = 50; // Start with translateY(50px)
             let currentScale = 1.15; // Start with initial zoom
-            
+
             // Set initial transform
             heroBg.style.transform = `translate(${currentX}px, ${currentY}px) scale(${currentScale})`;
-            
+
             // Mouse wheel zoom
-            heroSection.addEventListener('wheel', function(e) {
+            heroSection.addEventListener('wheel', function (e) {
                 e.preventDefault();
-                
+
                 const delta = e.deltaY > 0 ? -0.05 : 0.05;
                 currentScale = currentScale + delta;
-                
+
                 // Limit zoom between 1.0 and 2.0 (NO zoom out below 1.0 to prevent edge visibility)
                 currentScale = Math.min(Math.max(currentScale, 1.0), 2.0);
-                
+
                 // Adjust pan limits when zooming
                 adjustPanLimits();
-                
+
                 heroBg.style.transform = `translate(${currentX}px, ${currentY}px) scale(${currentScale})`;
             }, { passive: false });
-            
+
             // Function to adjust pan limits based on current zoom
             function adjustPanLimits() {
                 // At zoom 1.0, allow minimal pan
                 // At zoom 2.0, allow more pan
                 const maxPanX = Math.max(0, (currentScale - 1.0) * 150);
                 const maxPanY = Math.max(0, (currentScale - 1.0) * 100);
-                
+
                 // Keep within bounds
                 currentX = Math.min(Math.max(currentX, -maxPanX), maxPanX);
                 currentY = Math.min(Math.max(currentY, 50 - maxPanY), 50 + maxPanY);
             }
-            
+
             // Mouse drag
-            heroSection.addEventListener('mousedown', function(e) {
+            heroSection.addEventListener('mousedown', function (e) {
                 // Don't pan if clicking on buttons or links
                 if (e.target.tagName === 'BUTTON' || e.target.tagName === 'A' || e.target.closest('button') || e.target.closest('a')) {
                     return;
                 }
-                
+
                 isDragging = true;
                 startX = e.clientX - currentX;
                 startY = e.clientY - currentY;
                 heroSection.style.cursor = 'grabbing';
             });
-            
-            document.addEventListener('mousemove', function(e) {
+
+            document.addEventListener('mousemove', function (e) {
                 if (!isDragging) return;
-                
+
                 e.preventDefault();
                 currentX = e.clientX - startX;
                 currentY = e.clientY - startY;
-                
+
                 // Dynamic pan limit based on zoom level
                 const maxPanX = Math.max(0, (currentScale - 1.0) * 150);
                 const maxPanY = Math.max(0, (currentScale - 1.0) * 100);
-                
+
                 currentX = Math.min(Math.max(currentX, -maxPanX), maxPanX);
                 currentY = Math.min(Math.max(currentY, 50 - maxPanY), 50 + maxPanY);
-                
+
                 heroBg.style.transform = `translate(${currentX}px, ${currentY}px) scale(${currentScale})`;
             });
-            
-            document.addEventListener('mouseup', function() {
+
+            document.addEventListener('mouseup', function () {
                 if (isDragging) {
                     isDragging = false;
                     heroSection.style.cursor = 'grab';
                 }
             });
-            
+
             // Touch support for mobile/trackpad
             let touchStartX, touchStartY;
             let initialDistance = 0;
             let initialScale = currentScale;
-            
-            heroSection.addEventListener('touchstart', function(e) {
+
+            heroSection.addEventListener('touchstart', function (e) {
                 if (e.target.tagName === 'BUTTON' || e.target.tagName === 'A' || e.target.closest('button') || e.target.closest('a')) {
                     return;
                 }
-                
+
                 if (e.touches.length === 1) {
                     // Single touch - pan
                     const touch = e.touches[0];
@@ -662,39 +815,39 @@
                     initialScale = currentScale;
                 }
             }, { passive: true });
-            
-            heroSection.addEventListener('touchmove', function(e) {
+
+            heroSection.addEventListener('touchmove', function (e) {
                 if (e.target.tagName === 'BUTTON' || e.target.tagName === 'A' || e.target.closest('button') || e.target.closest('a')) {
                     return;
                 }
-                
+
                 if (e.touches.length === 1) {
                     // Single touch - pan
                     const touch = e.touches[0];
                     currentX = touch.clientX - touchStartX;
                     currentY = touch.clientY - touchStartY;
-                    
+
                     // Dynamic limit based on zoom
                     const maxPanX = Math.max(0, (currentScale - 1.0) * 150);
                     const maxPanY = Math.max(0, (currentScale - 1.0) * 100);
-                    
+
                     currentX = Math.min(Math.max(currentX, -maxPanX), maxPanX);
                     currentY = Math.min(Math.max(currentY, 50 - maxPanY), 50 + maxPanY);
-                    
+
                     heroBg.style.transform = `translate(${currentX}px, ${currentY}px) scale(${currentScale})`;
                 } else if (e.touches.length === 2) {
                     // Two touches - pinch zoom
                     const dx = e.touches[0].clientX - e.touches[1].clientX;
                     const dy = e.touches[0].clientY - e.touches[1].clientY;
                     const distance = Math.sqrt(dx * dx + dy * dy);
-                    
+
                     currentScale = initialScale * (distance / initialDistance);
                     // Limit zoom 1.0 to 2.0 (prevent zoom out below 1.0)
                     currentScale = Math.min(Math.max(currentScale, 1.0), 2.0);
-                    
+
                     // Adjust pan when zooming
                     adjustPanLimits();
-                    
+
                     heroBg.style.transform = `translate(${currentX}px, ${currentY}px) scale(${currentScale})`;
                 }
             }, { passive: true });
@@ -702,5 +855,5 @@
     </script>
 
 </body>
-</html>
 
+</html>
