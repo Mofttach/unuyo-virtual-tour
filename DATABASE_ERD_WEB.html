@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERD Generator - Virtual Tour UNU Yogyakarta</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 2rem;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+        
+        .tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 2px solid #e9ecef;
+            padding: 0 2rem;
+        }
+        
+        .tab {
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #6c757d;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .tab:hover {
+            color: #667eea;
+        }
+        
+        .tab.active {
+            color: #667eea;
+        }
+        
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #667eea;
+        }
+        
+        .content {
+            padding: 2rem;
+        }
+        
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        .mermaid {
+            background: #f8f9fa;
+            padding: 2rem;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+            margin: 1rem 0;
+        }
+        
+        .code-block {
+            background: #282c34;
+            color: #abb2bf;
+            padding: 1.5rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            margin: 1rem 0;
+            position: relative;
+        }
+        
+        .code-block pre {
+            margin: 0;
+            font-family: 'Monaco', 'Menlo', 'Courier New', monospace;
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.5rem 1rem;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .copy-btn:hover {
+            background: #5568d3;
+        }
+        
+        .copy-btn.copied {
+            background: #4caf50;
+        }
+        
+        .info-card {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+        
+        .info-card h3 {
+            color: #2e7d32;
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+        }
+        
+        .info-card ul {
+            margin: 0.5rem 0 0 1.5rem;
+        }
+        
+        .info-card li {
+            margin: 0.5rem 0;
+        }
+        
+        .warning-card {
+            background: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+        
+        .warning-card h3 {
+            color: #e65100;
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+        }
+        
+        .primary-card {
+            background: #e3f2fd;
+            border-left: 4px solid #2196f3;
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+        }
+        
+        .primary-card h3 {
+            color: #1565c0;
+            margin-bottom: 0.5rem;
+            font-size: 1.2rem;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 1rem;
+            margin: 1.5rem 0;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #5a6268;
+            transform: translateY(-2px);
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1.5rem 0;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-card .number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        
+        .stat-card .label {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            body {
+                padding: 1rem;
+            }
+            
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .tabs {
+                overflow-x: auto;
+                padding: 0 1rem;
+            }
+            
+            .content {
+                padding: 1rem;
+            }
+            
+            .tab {
+                padding: 0.75rem 1rem;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📊 ERD Database Generator</h1>
+            <p>Virtual Tour UNU Yogyakarta</p>
+        </div>
+        
+        <div class="tabs">
+            <button class="tab active" onclick="showTab('mermaid')">🎨 Mermaid Preview</button>
+            <button class="tab" onclick="showTab('dbdiagram')">🔷 DBDiagram.io</button>
+            <button class="tab" onclick="showTab('quickdbd')">⚡ QuickDBD</button>
+            <button class="tab" onclick="showTab('sql')">💾 SQL Schema</button>
+            <button class="tab" onclick="showTab('info')">ℹ️ Info</button>
+        </div>
+        
+        <div class="content">
+            <!-- Tab 1: Mermaid Preview -->
+            <div id="mermaid" class="tab-content active">
+                <h2>🎨 Mermaid ERD Preview</h2>
+                <p>Diagram interaktif langsung di browser</p>
+                
+                <div class="mermaid">
+erDiagram
+    SCENE ||--o{ HOTSPOT : "has many"
+    SCENE ||--o{ HOTSPOT : "referenced by"
+    
+    SCENE {
+        int id PK
+        string title
+        string slug UK
+        text description
+        string building
+        int floor "nullable"
+        string floor_description
+        int order
+        string location
+        date published_date
+        image panorama_image
+        image thumbnail
+        string author
+        boolean is_active
+        boolean is_featured
+        float initial_pitch
+        float initial_yaw
+        float initial_fov
+        datetime created_at
+        datetime updated_at
+    }
+    
+    HOTSPOT {
+        int id PK
+        int from_scene_id FK
+        int to_scene_id FK "nullable"
+        string hotspot_type "scene|info|floor"
+        float pitch
+        float yaw
+        string text
+        text info_description
+        datetime created_at
+    }
+                </div>
+                
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="number">2</div>
+                        <div class="label">Tables</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number">28</div>
+                        <div class="label">Total Fields</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number">2</div>
+                        <div class="label">Foreign Keys</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="number">1:N</div>
+                        <div class="label">Relationship</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Tab 2: DBDiagram.io -->
+            <div id="dbdiagram" class="tab-content">
+                <h2>🔷 DBDiagram.io Format (DBML)</h2>
+                <p>Copy code di bawah dan paste ke <a href="https://dbdiagram.io/d" target="_blank" style="color: #667eea;">dbdiagram.io</a></p>
+                
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="copyCode('dbml-code')">📋 Copy DBML Code</button>
+                    <a href="https://dbdiagram.io/d" target="_blank" class="btn btn-secondary">🔗 Open DBDiagram.io</a>
+                </div>
+                
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode('dbml-code')">Copy</button>
+                    <pre id="dbml-code">// Lihat file: erd_schema.dbml
+// Atau copy dari tab SQL lalu convert ke DBML di website</pre>
+                </div>
+                
+                <div class="info-card">
+                    <h3>📖 Cara Pakai:</h3>
+                    <ul>
+                        <li>1. Klik tombol "Copy DBML Code" di atas</li>
+                        <li>2. Buka <a href="https://dbdiagram.io/d" target="_blank">dbdiagram.io/d</a></li>
+                        <li>3. Paste code di panel kiri</li>
+                        <li>4. ERD akan muncul otomatis di panel kanan</li>
+                        <li>5. Export ke PNG/PDF/SQL dari menu Export</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Tab 3: QuickDBD -->
+            <div id="quickdbd" class="tab-content">
+                <h2>⚡ QuickDBD Format</h2>
+                <p>Copy code di bawah dan paste ke <a href="https://app.quickdatabasediagrams.com/" target="_blank" style="color: #667eea;">QuickDBD</a></p>
+                
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="copyCode('quickdbd-code')">📋 Copy QuickDBD Code</button>
+                    <a href="https://app.quickdatabasediagrams.com/" target="_blank" class="btn btn-secondary">🔗 Open QuickDBD</a>
+                </div>
+                
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode('quickdbd-code')">Copy</button>
+                    <pre id="quickdbd-code"># tour_api_scene
+----
+id INTEGER PK INCREMENT
+title VARCHAR(200) NOT NULL
+slug VARCHAR(250) UNIQUE NOT NULL
+description TEXT NOT NULL
+building VARCHAR(100) NOT NULL
+floor INTEGER NULL
+panorama_image VARCHAR(100) NOT NULL
+thumbnail VARCHAR(100) NOT NULL
+published_date DATE NOT NULL
+author VARCHAR(100) NOT NULL
+is_active BOOLEAN NOT NULL
+is_featured BOOLEAN NOT NULL
+initial_pitch FLOAT NOT NULL
+initial_yaw FLOAT NOT NULL
+initial_fov FLOAT NOT NULL
+created_at DATETIME NOT NULL
+updated_at DATETIME NOT NULL
+
+# tour_api_hotspot
+----
+id INTEGER PK INCREMENT
+from_scene_id INTEGER NOT NULL FK >- tour_api_scene.id
+to_scene_id INTEGER NULL FK >- tour_api_scene.id
+hotspot_type VARCHAR(10) NOT NULL
+pitch FLOAT NOT NULL
+yaw FLOAT NOT NULL
+text VARCHAR(100) NOT NULL
+info_description TEXT NULL
+created_at DATETIME NOT NULL</pre>
+                </div>
+                
+                <div class="info-card">
+                    <h3>📖 Cara Pakai:</h3>
+                    <ul>
+                        <li>1. Klik tombol "Copy QuickDBD Code" di atas</li>
+                        <li>2. Buka <a href="https://app.quickdatabasediagrams.com/" target="_blank">QuickDBD</a></li>
+                        <li>3. Paste code di panel kiri</li>
+                        <li>4. Klik "Update Diagram" atau tekan Ctrl+Enter</li>
+                        <li>5. Export diagram dari menu File → Export</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Tab 4: SQL Schema -->
+            <div id="sql" class="tab-content">
+                <h2>💾 SQL Schema</h2>
+                <p>SQL lengkap untuk create tables, indexes, dan sample data</p>
+                
+                <div class="btn-group">
+                    <button class="btn btn-primary" onclick="copyCode('sql-code')">📋 Copy SQL</button>
+                    <button class="btn btn-secondary" onclick="downloadSQL()">💾 Download SQL File</button>
+                </div>
+                
+                <div class="code-block">
+                    <button class="copy-btn" onclick="copyCode('sql-code')">Copy</button>
+                    <pre id="sql-code">-- Lihat file lengkap: erd_schema.sql
+CREATE TABLE tour_api_scene (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    title VARCHAR(200) NOT NULL,
+    slug VARCHAR(250) NOT NULL UNIQUE,
+    description TEXT NOT NULL,
+    building VARCHAR(100) NOT NULL DEFAULT 'Gedung Utama',
+    floor INTEGER CHECK(floor >= 1 AND floor <= 9),
+    panorama_image VARCHAR(100) NOT NULL,
+    thumbnail VARCHAR(100) NOT NULL,
+    published_date DATE NOT NULL,
+    author VARCHAR(100) NOT NULL,
+    is_active BOOLEAN NOT NULL DEFAULT 1,
+    is_featured BOOLEAN NOT NULL DEFAULT 0,
+    initial_pitch FLOAT NOT NULL DEFAULT 0,
+    initial_yaw FLOAT NOT NULL DEFAULT 0,
+    initial_fov FLOAT NOT NULL DEFAULT 90,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE TABLE tour_api_hotspot (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    from_scene_id INTEGER NOT NULL,
+    to_scene_id INTEGER,
+    hotspot_type VARCHAR(10) NOT NULL DEFAULT 'scene',
+    pitch FLOAT NOT NULL,
+    yaw FLOAT NOT NULL,
+    text VARCHAR(100) NOT NULL,
+    info_description TEXT,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (from_scene_id) REFERENCES tour_api_scene(id) ON DELETE CASCADE,
+    FOREIGN KEY (to_scene_id) REFERENCES tour_api_scene(id) ON DELETE CASCADE
+);</pre>
+                </div>
+                
+                <div class="warning-card">
+                    <h3>⚠️ Catatan:</h3>
+                    <ul>
+                        <li>File SQL lengkap tersedia di: <code>erd_schema.sql</code></li>
+                        <li>Sudah include sample data dan validation queries</li>
+                        <li>Support SQLite, PostgreSQL, dan MySQL dengan minor adjustments</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <!-- Tab 5: Info -->
+            <div id="info" class="tab-content">
+                <h2>ℹ️ Informasi Database</h2>
+                
+                <div class="info-card">
+                    <h3>📊 Statistik Database</h3>
+                    <ul>
+                        <li><strong>Total Tables:</strong> 2 (Scene, Hotspot)</li>
+                        <li><strong>Total Fields:</strong> 28 fields</li>
+                        <li><strong>Foreign Keys:</strong> 2 (from_scene_id, to_scene_id)</li>
+                        <li><strong>Indexes:</strong> 6 indexes untuk optimasi query</li>
+                        <li><strong>Relationships:</strong> One-to-Many (1:N)</li>
+                    </ul>
+                </div>
+                
+                <div class="primary-card">
+                    <h3>🔗 Relationships</h3>
+                    <ul>
+                        <li><strong>Scene → Hotspot:</strong> One scene has many hotspots (1:N)</li>
+                        <li><strong>Scene ← Hotspot:</strong> One scene can be referenced by many hotspots (1:N)</li>
+                        <li><strong>Cascade Delete:</strong> Menghapus scene akan otomatis hapus semua hotspotnya</li>
+                        <li><strong>Self-Referencing:</strong> Hotspot bisa reference ke scene lain</li>
+                    </ul>
+                </div>
+                
+                <div class="warning-card">
+                    <h3>📋 Business Rules</h3>
+                    <ul>
+                        <li>Hanya boleh ada 1 scene dengan <code>is_featured=TRUE</code> (starting point)</li>
+                        <li>Field <code>floor</code> harus antara 1-9 atau NULL untuk outdoor</li>
+                        <li>Jika <code>hotspot_type='scene'</code> maka <code>to_scene_id</code> WAJIB diisi</li>
+                        <li><code>pitch</code> valid range: -90° hingga 90°</li>
+                        <li><code>yaw</code> valid range: -180° hingga 180°</li>
+                        <li><code>slug</code> otomatis di-generate dari title jika kosong</li>
+                    </ul>
+                </div>
+                
+                <div class="info-card">
+                    <h3>🛠️ Tools untuk Generate ERD</h3>
+                    <ul>
+                        <li><strong><a href="https://dbdiagram.io/d" target="_blank">DBDiagram.io</a></strong> - DBML format, instant preview, export PNG/PDF/SQL</li>
+                        <li><strong><a href="https://app.quickdatabasediagrams.com/" target="_blank">QuickDBD</a></strong> - Text-based, simple format, quick export</li>
+                        <li><strong><a href="https://mermaid.live/" target="_blank">Mermaid Live Editor</a></strong> - Online Mermaid editor, copy diagram dari tab Mermaid</li>
+                        <li><strong><a href="https://www.eralchemy.io/" target="_blank">ERAlchemy</a></strong> - Python tool untuk generate dari SQL/Django (offline)</li>
+                    </ul>
+                </div>
+                
+                <div class="primary-card">
+                    <h3>📁 File yang Tersedia</h3>
+                    <ul>
+                        <li><code>erd_schema.sql</code> - SQL schema lengkap dengan sample data</li>
+                        <li><code>erd_schema.dbml</code> - DBML format untuk dbdiagram.io</li>
+                        <li><code>erd_schema.quickdbd</code> - QuickDBD format</li>
+                        <li><code>DATABASE_ERD_WEB.html</code> - File HTML ini</li>
+                        <li><code>generate_erd.py</code> - Python script untuk generate PNG/PDF</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Initialize Mermaid
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            themeVariables: {
+                primaryColor: '#667eea',
+                primaryTextColor: '#fff',
+                primaryBorderColor: '#5568d3',
+                lineColor: '#757575',
+                secondaryColor: '#764ba2',
+                tertiaryColor: '#fff'
+            }
+        });
+        
+        // Tab switching
+        function showTab(tabName) {
+            // Hide all tabs
+            document.querySelectorAll('.tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab
+            document.getElementById(tabName).classList.add('active');
+            event.target.classList.add('active');
+        }
+        
+        // Copy code function
+        function copyCode(elementId) {
+            const code = document.getElementById(elementId).textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                const btn = event.target;
+                const originalText = btn.textContent;
+                btn.textContent = '✓ Copied!';
+                btn.classList.add('copied');
+                
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.classList.remove('copied');
+                }, 2000);
+            });
+        }
+        
+        // Download SQL
+        function downloadSQL() {
+            const sql = document.getElementById('sql-code').textContent;
+            const blob = new Blob([sql], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'erd_schema.sql';
+            a.click();
+            window.URL.revokeObjectURL(url);
+        }
+    </script>
+</body>
+</html>

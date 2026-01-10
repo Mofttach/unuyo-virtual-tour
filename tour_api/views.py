@@ -1,13 +1,15 @@
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, IsAdminUser
 from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from .models import Scene, Hotspot
 from .serializers import (
     SceneListSerializer, 
     SceneDetailSerializer,
-    PannellumConfigSerializer
+    PannellumConfigSerializer,
+    HotspotSerializer
 )
 
 
@@ -149,3 +151,38 @@ class SceneViewSet(viewsets.ReadOnlyModelViewSet):
                 {"detail": f"Scene not found: {kwargs.get('slug')}"}, 
                 status=status.HTTP_404_NOT_FOUND
             )
+
+
+class HotspotViewSet(viewsets.ModelViewSet):
+    """
+    API ViewSet for Hotspot CRUD operations (for admin visual editor)
+    
+    Endpoints:
+    - GET /api/hotspots/              : List all hotspots
+    - GET /api/hotspots/{id}/         : Get hotspot detail
+    - POST /api/hotspots/             : Create new hotspot
+    - PUT /api/hotspots/{id}/         : Update hotspot
+    - DELETE /api/hotspots/{id}/      : Delete hotspot
+    """
+    queryset = Hotspot.objects.all().select_related('from_scene', 'to_scene')
+    serializer_class = HotspotSerializer
+    permission_classes = [IsAuthenticatedOrReadOnly]
+    
+    def get_queryset(self):
+        """Filter by from_scene if provided"""
+        queryset = super().get_queryset()
+        from_scene = self.request.query_params.get('from_scene')
+        
+        if from_scene:
+            queryset = queryset.filter(from_scene_id=from_scene)
+        
+        return queryset
+    
+    def perform_create(self, serializer):
+        """Create hotspot with validation"""
+        serializer.save()
+    
+    def perform_update(self, serializer):
+        """Update hotspot with validation"""
+        serializer.save()
+

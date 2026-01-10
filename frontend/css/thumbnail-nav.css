@@ -150,23 +150,77 @@
 /* Mobile Responsiveness */
 @media (max-width: 768px) {
     .thumbnail-nav-container {
-        width: 95%;
-        bottom: 10px;
-        height: 110px;
+        width: calc(100% - 16px);
+        bottom: 8px;
+        height: 70px;
     }
 
     .thumbnail-scroll-wrapper {
-        padding: 8px 35px;
+        padding: 5px 30px;
+        border-radius: 12px;
+    }
+
+    .thumbnail-list {
+        gap: 8px;
     }
 
     .thumbnail-item {
-        width: 140px;
-        height: 80px;
+        width: 90px;
+        height: 55px;
+        border-radius: 6px;
+    }
+
+    .thumbnail-title {
+        font-size: 9px;
+        padding: 4px 6px;
     }
 
     .nav-arrow {
-        width: 30px;
-        height: 30px;
-        font-size: 12px;
+        width: 28px;
+        height: 28px;
+        font-size: 11px;
+    }
+
+    .nav-arrow.left {
+        left: 5px;
+    }
+
+    .nav-arrow.right {
+        right: 5px;
+    }
+}
+
+@media (max-width: 480px) {
+    .thumbnail-nav-container {
+        width: calc(100% - 12px);
+        bottom: 6px;
+        height: 60px;
+    }
+
+    .thumbnail-scroll-wrapper {
+        padding: 4px 26px;
+        border-radius: 10px;
+    }
+
+    .thumbnail-list {
+        gap: 6px;
+        padding: 0 5px;
+    }
+
+    .thumbnail-item {
+        width: 75px;
+        height: 48px;
+        border-width: 1.5px;
+    }
+
+    .thumbnail-title {
+        font-size: 8px;
+        padding: 3px 4px;
+    }
+
+    .nav-arrow {
+        width: 24px;
+        height: 24px;
+        font-size: 10px;
     }
 }

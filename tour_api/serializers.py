@@ -3,7 +3,7 @@ from .models import Scene, Hotspot
 
 
 class HotspotSerializer(serializers.ModelSerializer):
-    """Serializer untuk Hotspot dengan informasi scene tujuan"""
+    """Serializer untuk Hotspot dengan informasi scene tujuan (Read & Write)"""
     to_scene_slug = serializers.CharField(source='to_scene.slug', read_only=True, allow_null=True)
     to_scene_title = serializers.CharField(source='to_scene.title', read_only=True, allow_null=True)
     
@@ -11,6 +11,8 @@ class HotspotSerializer(serializers.ModelSerializer):
         model = Hotspot
         fields = [
             'id', 
+            'from_scene',
+            'to_scene',
             'hotspot_type', 
             'to_scene_slug',
             'to_scene_title',
@@ -19,6 +21,21 @@ class HotspotSerializer(serializers.ModelSerializer):
             'pitch', 
             'yaw'
         ]
+        read_only_fields = ['id', 'to_scene_slug', 'to_scene_title']
+    
+    def validate(self, data):
+        """Validate hotspot data"""
+        if data.get('hotspot_type') in ['scene', 'floor'] and not data.get('to_scene'):
+            raise serializers.ValidationError({
+                'to_scene': 'Scene tujuan wajib diisi untuk hotspot navigasi'
+            })
+        
+        if data.get('hotspot_type') == 'info' and not data.get('info_description'):
+            raise serializers.ValidationError({
+                'info_description': 'Deskripsi info wajib diisi untuk info point'
+            })
+        
+        return data
 
 
 class SceneListSerializer(serializers.ModelSerializer):

@@ -1,7 +1,29 @@
 /**
- * Virtual Tour UNU Yogyakarta - Simple Version
- * Konsep: One scene per view, NO hotspot navigation, Simple info points
+ * Virtual Tour UNU Yogyakarta - Enhanced Version
+ * Features: Interactive hotspot navigation, Info points, Floor navigation
  */
+
+// Helper function untuk show info popup
+function showInfoPopup(title, description) {
+    // Check if popup already exists
+    let popup = document.getElementById('info-popup');
+    if (!popup) {
+        popup = document.createElement('div');
+        popup.id = 'info-popup';
+        popup.className = 'info-popup';
+        document.body.appendChild(popup);
+    }
+    
+    popup.innerHTML = `
+        <div class="info-popup-content">
+            <button class="info-popup-close" onclick="document.getElementById('info-popup').classList.remove('active')">&times;</button>
+            <h3>${title}</h3>
+            <p>${description || 'Tidak ada deskripsi.'}</p>
+        </div>
+    `;
+    
+    popup.classList.add('active');
+}
 
 // =================================================================
 // CONFIGURATION
@@ -192,25 +214,75 @@ function initializePanoramaViewer(scene, withIntro = false) {
         state.viewer = null;
     }
     
-    // Build hotspots for info points only (NO navigation)
+    // Build hotspots for all types with clear markers
     const hotspots = [];
     
     if (scene.hotspots && Array.isArray(scene.hotspots)) {
         scene.hotspots.forEach(hotspot => {
-            // Only add info hotspots, skip link hotspots
-            if (hotspot.type === 'info') {
+            const hotspotType = hotspot.hotspot_type || hotspot.type;
+            
+            if (hotspotType === 'scene' || hotspotType === 'floor') {
+                // Navigation hotspot - arrow marker
+                const targetSlug = hotspot.to_scene_slug;
+                const tooltipText = hotspot.text || 'Navigate';
+                
                 hotspots.push({
                     pitch: parseFloat(hotspot.pitch),
                     yaw: parseFloat(hotspot.yaw),
+                    type: 'info',  // Use 'info' type for custom styling
+                    cssClass: 'custom-nav-hotspot',
+                    clickHandlerFunc: (e) => {
+                        e.stopPropagation();
+                        if (targetSlug) {
+                            console.log('🔗 Navigating to:', targetSlug);
+                            loadScene(targetSlug);
+                        }
+                    },
+                    createTooltipFunc: (hotSpotDiv) => {
+                        hotSpotDiv.style.pointerEvents = 'auto';
+                        hotSpotDiv.style.cursor = 'pointer';
+                        const tooltip = document.createElement('div');
+                        tooltip.classList.add('custom-tooltip');
+                        tooltip.textContent = tooltipText;
+                        hotSpotDiv.appendChild(tooltip);
+                        hotSpotDiv.classList.add('has-tooltip');
+                    }
+                });
+            } else if (hotspotType === 'info') {
+                // Info hotspot - info icon
+                const infoTitle = hotspot.text || 'Info';
+                const infoDesc = hotspot.info_description || '';
+                const hPitch = parseFloat(hotspot.pitch) || 0;
+                const hYaw = parseFloat(hotspot.yaw) || 0;
+                
+                console.log(`📍 Adding info hotspot: "${infoTitle}" at pitch=${hPitch}, yaw=${hYaw}`);
+                
+                hotspots.push({
+                    pitch: hPitch,
+                    yaw: hYaw,
                     type: 'info',
-                    text: hotspot.text,
-                    cssClass: 'custom-info-hotspot'
+                    cssClass: 'custom-info-hotspot',
+                    clickHandlerFunc: (e) => {
+                        e.stopPropagation();
+                        console.log('ℹ️ Showing info:', infoTitle);
+                        showInfoPopup(infoTitle, infoDesc);
+                    },
+                    createTooltipFunc: (hotSpotDiv) => {
+                        hotSpotDiv.style.pointerEvents = 'auto';
+                        hotSpotDiv.style.cursor = 'pointer';
+                        const tooltip = document.createElement('div');
+                        tooltip.classList.add('custom-tooltip');
+                        tooltip.textContent = infoTitle;
+                        hotSpotDiv.appendChild(tooltip);
+                        hotSpotDiv.classList.add('has-tooltip');
+                    }
                 });
             }
         });
     }
 
-    // DEBUG: Dummy hotspot removed
+    // DEBUG: Log hotspots
+    console.log('🔥 Hotspots to render:', hotspots);
     
     // Set initial camera position
     const initialPitch = withIntro ? 90 : parseFloat(scene.initial_pitch) || 0;  // Start from sky if intro

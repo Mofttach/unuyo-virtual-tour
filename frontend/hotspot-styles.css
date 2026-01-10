@@ -1,69 +1,200 @@
 /**
- * Custom Hotspot Styles for Info Points
- * Simple, elegant info markers
+ * Custom Hotspot Styles for Pannellum
+ * Clean, minimal navigation arrows
  */
 
-/* Info Hotspot Base Style */
-.custom-info-hotspot {
-    width: 36px !important;
-    height: 36px !important;
-    background: rgba(0, 0, 0, 0.7) !important;
-    /* Dark transparent to match UI */
-    border: 1px solid rgba(255, 255, 255, 0.3) !important;
-    border-radius: 50% !important;
-    cursor: pointer !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3) !important;
-    transition: all 0.2s ease !important;
-    position: relative !important;
-    backdrop-filter: blur(4px);
-}
-
-/* Icon Inside Hotspot */
-.custom-info-hotspot::before {
-    content: '\f129';
-    /* Font Awesome 'i' icon */
-    font-family: 'Font Awesome 6 Free';
-    font-weight: 900;
-    color: rgba(255, 255, 255, 0.9);
-    font-size: 16px;
-}
-
-/* Hover Effect */
-.custom-info-hotspot:hover {
-    transform: scale(1.1) !important;
-    background: rgba(0, 0, 0, 0.9) !important;
-    border-color: rgba(255, 255, 255, 0.8) !important;
-    box-shadow: 0 0 15px rgba(255, 255, 255, 0.2) !important;
-}
-
-/* Pulse Animation - REMOVED (Static Icon) */
-.custom-info-hotspot::after {
-    display: none;
-}
-
-/* Tooltip Style (Pannellum default) */
+/* Hide Pannellum default tooltip */
 .pnlm-tooltip {
-    background-color: rgba(0, 0, 0, 0.85) !important;
-    /* Dark background */
-    border: 1px solid rgba(255, 255, 255, 0.2) !important;
-    border-radius: 6px !important;
-    padding: 10px 14px !important;
-    font-family: 'Inter', sans-serif !important;
-    font-size: 13px !important;
-    color: rgba(255, 255, 255, 0.95) !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4) !important;
-    max-width: 220px !important;
-    backdrop-filter: blur(8px);
-    /* Glass effect for tooltip */
-    pointer-events: none;
-    /* Prevent tooltip from interfering with clicks */
+    display: none !important;
 }
 
-/* Tooltip Arrow */
-.pnlm-tooltip span {
-    display: none !important;
-    /* Hide default arrow */
+/* Navigation Hotspot - Clean Arrow Icon */
+div.pnlm-hotspot-base.custom-nav-hotspot {
+    width: 80px !important;
+    height: 90px !important;
+    background: transparent !important;
+    border: none !important;
+    cursor: pointer !important;
+    filter: drop-shadow(0 6px 12px rgba(0, 0, 0, 0.8)) !important;
+    transition: transform 0.2s ease, filter 0.2s ease !important;
+    position: relative !important;
+    animation: arrowFloat 2s ease-in-out infinite !important;
+    display: block !important;
+    opacity: 1 !important;
+}
+
+/* Main arrow - white with black outline */
+div.pnlm-hotspot-base.custom-nav-hotspot::before {
+    content: '' !important;
+    display: block !important;
+    position: absolute !important;
+    top: 0 !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 0 !important;
+    height: 0 !important;
+    border-left: 30px solid transparent !important;
+    border-right: 30px solid transparent !important;
+    border-bottom: 55px solid white !important;
+    filter: drop-shadow(0 0 3px rgba(0, 0, 0, 0.8)) !important;
+}
+
+/* Inner black outline for contrast */
+div.pnlm-hotspot-base.custom-nav-hotspot::after {
+    content: '' !important;
+    display: block !important;
+    position: absolute !important;
+    top: 5px !important;
+    left: 50% !important;
+    transform: translateX(-50%) !important;
+    width: 0 !important;
+    height: 0 !important;
+    border-left: 20px solid transparent !important;
+    border-right: 20px solid transparent !important;
+    border-bottom: 38px solid rgba(0, 0, 0, 0.2) !important;
+}
+
+@keyframes arrowFloat {
+    0%, 100% {
+        transform: translateY(0);
+    }
+    50% {
+        transform: translateY(-10px);
+    }
+}
+
+div.pnlm-hotspot-base.custom-nav-hotspot:hover {
+    animation: none;
+    transform: scale(1.2) translateY(-5px);
+    filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.7));
+}
+
+/* Info Hotspot - Clean Blue Circle */
+div.pnlm-hotspot-base.custom-info-hotspot {
+    width: 44px;
+    height: 44px;
+    background: rgba(52, 152, 219, 0.9) !important;
+    border: 3px solid white !important;
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+}
+
+div.pnlm-hotspot-base.custom-info-hotspot::after {
+    content: 'i';
+    color: white;
+    font-size: 20px;
+    font-weight: bold;
+    font-style: italic;
+    font-family: Georgia, serif;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+div.pnlm-hotspot-base.custom-info-hotspot:hover {
+    transform: scale(1.15);
+    box-shadow: 0 6px 20px rgba(52, 152, 219, 0.6);
+}
+
+/* Custom Tooltip */
+.custom-tooltip {
+    position: absolute;
+    bottom: 80px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: rgba(0, 0, 0, 0.85);
+    color: white;
+    padding: 8px 14px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    white-space: nowrap;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    z-index: 1000;
+}
+
+.has-tooltip:hover .custom-tooltip {
+    opacity: 1;
+}
+
+/* Info Popup */
+.info-popup {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%) scale(0.95);
+    background: white;
+    padding: 0;
+    border-radius: 16px;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+    max-width: 420px;
+    width: 90%;
+    z-index: 10000;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.info-popup.active {
+    opacity: 1;
+    pointer-events: all;
+    transform: translate(-50%, -50%) scale(1);
+}
+
+.info-popup-content {
+    position: relative;
+    padding: 1.5rem;
+}
+
+.info-popup-content::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #0a5f38, #10a060, #0a5f38);
+}
+
+.info-popup-content h3 {
+    margin: 0.5rem 0 1rem 0;
+    color: #1e293b;
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.info-popup-content p {
+    margin: 0;
+    color: #64748b;
+    line-height: 1.7;
+}
+
+.info-popup-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    background: #f1f5f9;
+    color: #64748b;
+    border: none;
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.info-popup-close:hover {
+    background: #fee2e2;
+    color: #dc2626;
 }

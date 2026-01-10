@@ -1,27 +1,35 @@
 from django.contrib import admin
 from django.utils.html import format_html
+from django.urls import reverse
+from django.utils.safestring import mark_safe
 from .models import Scene, Hotspot
 
 
-class HotspotInline(admin.TabularInline):
-    """Inline admin untuk menambah hotspot langsung dari halaman Scene"""
+class HotspotInline(admin.StackedInline):
+    """Inline admin untuk menambah hotspot (opsional - gunakan Visual Editor)"""
     model = Hotspot
     fk_name = 'from_scene'
-    extra = 1
-    fields = ('hotspot_type', 'to_scene', 'text', 'pitch', 'yaw', 'info_description')
+    extra = 0
+    fields = ('hotspot_type', 'to_scene', 'text', 'pitch', 'yaw')
     autocomplete_fields = ['to_scene']
+    classes = ['collapse']
+    
+    verbose_name = "Hotspot Manual (Opsional)"
+    verbose_name_plural = "Hotspot Manual - Lebih mudah gunakan Visual Editor di bawah"
 
 
 @admin.register(Scene)
 class SceneAdmin(admin.ModelAdmin):
+    change_form_template = 'admin/tour_api/scene_change_form.html'
     list_display = (
+        'thumbnail_preview',
         'title', 
         'building',
         'floor_badge',
         'location', 
         'published_date', 
-        'is_featured',
-        'is_active',
+        'is_featured_badge',
+        'is_active_badge',
         'hotspot_count',
         'created_at'
     )
@@ -39,27 +47,17 @@ class SceneAdmin(admin.ModelAdmin):
     date_hierarchy = 'published_date'
     
     fieldsets = (
-        ('Informasi Dasar', {
-            'fields': ('title', 'slug', 'description')
+        ('Informasi Lokasi', {
+            'fields': ('title', 'slug', 'description', 'location', 'published_date')
         }),
-        ('Struktur Kampus', {
-            'fields': ('building', 'floor', 'floor_description', 'order'),
-            'description': '<strong>Tentukan lokasi scene dalam struktur gedung dan lantai.</strong><br>'
-                          'Floor: 1-9 untuk gedung bertingkat, kosongkan untuk area outdoor.<br>'
-                          'Order: Urutan tampil dalam satu lantai (angka kecil = tampil lebih dulu).'
-        }),
-        ('Lokasi & Tanggal', {
-            'fields': ('location', 'published_date', 'author')
+        ('Struktur Bangunan', {
+            'fields': ('building', 'floor', 'order'),
+            'description': 'Tentukan gedung dan lantai untuk organisasi yang lebih baik'
         }),
         ('Media', {
             'fields': ('panorama_image', 'thumbnail', 'panorama_preview')
         }),
-        ('Pengaturan Kamera 360°', {
-            'classes': ('collapse',),
-            'fields': ('initial_pitch', 'initial_yaw', 'initial_fov'),
-            'description': 'Pitch: -90 (lantai) to 90 (langit). Yaw: -180 to 180 (0 = depan). FOV: 50-120 (zoom level).'
-        }),
-        ('Status Publikasi', {
+        ('Status', {
             'fields': ('is_active', 'is_featured')
         }),
     )
@@ -68,7 +66,57 @@ class SceneAdmin(admin.ModelAdmin):
     
     readonly_fields = ('created_at', 'updated_at', 'panorama_preview', 'hotspot_count')
     
-    actions = ['make_featured', 'make_active', 'make_inactive', 'copy_to_next_floor']
+    actions = ['make_featured', 'make_active', 'make_inactive']
+    
+    list_per_page = 20
+    list_max_show_all = 100
+    
+    def thumbnail_preview(self, obj):
+        """Show small thumbnail in list view"""
+        if obj.thumbnail:
+            return format_html(
+                '<img src="{}" style="width: 80px; height: 45px; object-fit: cover; '
+                'border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"/>',
+                obj.thumbnail.url
+            )
+        return format_html('<div style="width: 80px; height: 45px; background: #ddd; '
+                          'border-radius: 4px; display: flex; align-items: center; '
+                          'justify-content: center; font-size: 10px; color: #999;">No Image</div>')
+    thumbnail_preview.short_description = "Preview"
+    
+    def is_featured_badge(self, obj):
+        """Visual badge for featured status"""
+        if obj.is_featured:
+            return format_html(
+                '<span style="background: #f39c12; color: white; padding: 3px 8px; '
+                'border-radius: 3px; font-size: 10px; font-weight: 600;">FEATURED</span>'
+            )
+        return format_html('<span style="color: #999;">-</span>')
+    is_featured_badge.short_description = "Featured"
+    
+    def is_active_badge(self, obj):
+        """Visual badge for active status"""
+        if obj.is_active:
+            return format_html(
+                '<span style="background: #27ae60; color: white; padding: 3px 8px; '
+                'border-radius: 3px; font-size: 10px; font-weight: 600;">ACTIVE</span>'
+            )
+        return format_html(
+            '<span style="background: #e74c3c; color: white; padding: 3px 8px; '
+            'border-radius: 3px; font-size: 10px; font-weight: 600;">INACTIVE</span>'
+        )
+    is_active_badge.short_description = "Status"
+    
+    def get_form(self, request, obj=None, **kwargs):
+        """Pass all scenes to form for hotspot editor dropdown"""
+        form = super().get_form(request, obj, **kwargs)
+        return form
+    
+    def change_view(self, request, object_id, form_url='', extra_context=None):
+        """Add extra context for visual editor"""
+        extra_context = extra_context or {}
+        extra_context['all_scenes'] = Scene.objects.filter(is_active=True).exclude(id=object_id)
+        return super().change_view(request, object_id, form_url, extra_context=extra_context)
     
     def floor_badge(self, obj):
         """Visual badge for floor number"""
@@ -115,22 +163,23 @@ class SceneAdmin(admin.ModelAdmin):
     panorama_preview.short_description = "Preview Panorama"
     
     def make_featured(self, request, queryset):
-        # Unfeature all scenes first
+        """Set selected scene as featured (starting point)"""
         Scene.objects.filter(is_featured=True).update(is_featured=False)
-        # Feature selected scene (should be only one)
         count = queryset.update(is_featured=True)
         self.message_user(request, f"{count} scene dijadikan featured (starting point)")
-    make_featured.short_description = "✨ Jadikan starting point"
+    make_featured.short_description = "Jadikan starting point"
     
     def make_active(self, request, queryset):
+        """Activate selected scenes"""
         count = queryset.update(is_active=True)
         self.message_user(request, f"{count} scene diaktifkan")
-    make_active.short_description = "✓ Aktifkan scene"
+    make_active.short_description = "Aktifkan scene"
     
     def make_inactive(self, request, queryset):
+        """Deactivate selected scenes"""
         count = queryset.update(is_active=False)
         self.message_user(request, f"{count} scene dinonaktifkan")
-    make_inactive.short_description = "✗ Nonaktifkan scene"
+    make_inactive.short_description = "Nonaktifkan scene"
 
 
 

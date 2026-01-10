@@ -1,0 +1,105 @@
+{% extends "admin/change_form.html" %}
+{% load static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'admin/css/custom-admin.css' %}">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css"/>
+{% endblock %}
+
+{% block after_field_sets %}
+{{ block.super }}
+
+{% if original.panorama_image %}
+<div class="module visual-editor-section">
+    <h2>Visual Hotspot Editor</h2>
+    <p class="help">Klik pada panorama untuk menambahkan hotspot. Koordinat akan tersimpan otomatis.</p>
+    
+    <div class="visual-editor-container">
+        <div id="panorama-viewer" style="width: 100%; height: 500px; border-radius: 8px; overflow: hidden;"></div>
+        
+        <div class="hotspot-controls">
+            <div class="control-group">
+                <label for="hotspot-type">Tipe:</label>
+                <select id="hotspot-type">
+                    <option value="scene">Navigasi ke Scene Lain</option>
+                    <option value="info">Info Point</option>
+                </select>
+            </div>
+            
+            <div class="control-group" id="to-scene-group">
+                <label for="to-scene">Tujuan:</label>
+                <select id="to-scene">
+                    <option value="">-- Pilih Scene --</option>
+                    {% for scene in all_scenes %}
+                    <option value="{{ scene.id }}">{{ scene.title }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="control-group">
+                <label for="hotspot-text">Label:</label>
+                <input type="text" id="hotspot-text" placeholder="Contoh: Ke Perpustakaan">
+            </div>
+            
+            <div class="control-group" id="info-desc-group" style="display: none;">
+                <label for="hotspot-info">Deskripsi:</label>
+                <textarea id="hotspot-info" rows="2" placeholder="Deskripsi info point"></textarea>
+            </div>
+            
+            <button type="button" id="add-hotspot-btn" class="button">Tambah Hotspot</button>
+        </div>
+        
+        <div class="hotspot-list">
+            <h3>Daftar Hotspot</h3>
+            <table class="hotspot-table">
+                <thead>
+                    <tr>
+                        <th>Tipe</th>
+                        <th>Label</th>
+                        <th>Tujuan</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="hotspot-list-body">
+                    {% for hotspot in original.hotspots.all %}
+                    <tr data-hotspot-id="{{ hotspot.id }}">
+                        <td>
+                            <span class="badge badge-{{ hotspot.hotspot_type }}">
+                                {{ hotspot.get_hotspot_type_display }}
+                            </span>
+                        </td>
+                        <td>{{ hotspot.text }}</td>
+                        <td>{{ hotspot.to_scene.title|default:"-" }}</td>
+                        <td>
+                            <button type="button" class="button small goto-hotspot" data-pitch="{{ hotspot.pitch }}" data-yaw="{{ hotspot.yaw }}">Lihat</button>
+                            <button type="button" class="button small delete-hotspot" data-id="{{ hotspot.id }}">Hapus</button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" style="text-align: center; color: #999;">Belum ada hotspot. Klik pada panorama untuk menambahkan.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+{% endblock %}
+
+{% block admin_change_form_document_ready %}
+{{ block.super }}
+<script src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
+<script src="{% static 'admin/js/hotspot-editor.js' %}"></script>
+{% if original.id %}
+<script>
+    var SCENE_ID = {{ original.id }};
+    var PANORAMA_URL = "{{ original.panorama_image.url }}";
+    var API_BASE = "/api";
+    var CSRF_TOKEN = "{{ csrf_token }}";
+</script>
+{% endif %}
+{% endblock %}

@@ -226,6 +226,27 @@
     }
 }
 
+@media (max-width: 480px) {
+    .intro-logo {
+        width: 100px;
+    }
+    
+    .intro-text {
+        font-size: 1.1rem;
+    }
+    
+    .intro-subtext {
+        font-size: 0.7rem;
+    }
+    
+    .skip-intro-btn {
+        bottom: 1.5rem;
+        right: 1.5rem;
+        padding: 0.5rem 1rem;
+        font-size: 0.7rem;
+    }
+}
+
 /* Little Planet View Hint (optional overlay during animation) */
 .little-planet-hint {
     position: absolute;
