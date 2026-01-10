@@ -1,0 +1,84 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block title %}{{ title }} | Virtual Tour Admin{% endblock %}
+
+{% block extrahead %}
+<!-- Tailwind CSS (Development Mode) -->
+<script src="https://cdn.tailwindcss.com"></script>
+<script>
+    tailwind.config = {
+        theme: {
+            extend: {
+                colors: {
+                    'unu-gold': '#d4af37',
+                    'unu-blue': '#1e3a8a',
+                    'unu-dark': '#0f172a',
+                },
+                fontFamily: {
+                    'sans': ['Inter', 'sans-serif'],
+                    'display': ['Poppins', 'sans-serif'],
+                }
+            }
+        }
+    }
+</script>
+<!-- Google Fonts -->
+<link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap"
+    rel="stylesheet">
+<!-- FontAwesome -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+    body {
+        font-family: 'Inter', sans-serif;
+        background-color: #f3f4f6;
+    }
+
+    /* Hide Default Sidebar and Breadcrumbs if not needed */
+    .breadcrumbs {
+        display: none !important;
+    }
+
+    #header {
+        background: #1e3a8a !important;
+        padding: 1rem 2rem;
+    }
+
+    #branding h1 {
+        font-family: 'Poppins', sans-serif;
+        font-weight: 600;
+        font-size: 1.25rem;
+    }
+
+    #user-tools {
+        color: white;
+        opacity: 0.9;
+    }
+
+    /* Smooth transitions */
+    .transition-all {
+        transition-property: all;
+        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+        transition-duration: 300ms;
+    }
+</style>
+{% endblock %}
+
+{% block branding %}
+<h1 id="site-name" class="flex items-center gap-3 text-white">
+    <i class="fas fa-vr-cardboard text-unu-gold text-2xl"></i>
+    <span>UNU Virtual Tour Admin</span>
+</h1>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}
+
+{% block nav-sidebar %}{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block content_title %}{% endblock %}
+
+<!-- Override Sidebar to handle full width if needed, or rely on index.html -->

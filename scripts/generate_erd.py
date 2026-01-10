@@ -14,6 +14,10 @@ import os
 import sys
 from pathlib import Path
 
+# Add project root to sys.path
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+sys.path.append(str(PROJECT_ROOT))
+
 def check_dependencies():
     """Check if required dependencies are installed"""
     try:
@@ -30,10 +34,12 @@ def generate_from_sql():
     """Generate ERD from SQL file"""
     from eralchemy2 import render_er
     
-    sql_file = Path(__file__).parent / "erd_schema.sql"
-    output_png = Path(__file__).parent / "DATABASE_ERD.png"
-    output_pdf = Path(__file__).parent / "DATABASE_ERD.pdf"
-    output_dot = Path(__file__).parent / "DATABASE_ERD.dot"
+    docs_dir = PROJECT_ROOT / "docs"
+    
+    sql_file = docs_dir / "erd_schema.sql"
+    output_png = docs_dir / "DATABASE_ERD.png"
+    output_pdf = docs_dir / "DATABASE_ERD.pdf"
+    output_dot = docs_dir / "DATABASE_ERD.dot"
     
     if not sql_file.exists():
         print(f"✗ SQL file not found: {sql_file}")
@@ -67,8 +73,9 @@ def generate_from_django():
     """Generate ERD from Django models"""
     from eralchemy2 import render_er
     
-    output_png = Path(__file__).parent / "DATABASE_ERD_DJANGO.png"
-    output_pdf = Path(__file__).parent / "DATABASE_ERD_DJANGO.pdf"
+    docs_dir = PROJECT_ROOT / "docs"
+    output_png = docs_dir / "DATABASE_ERD_DJANGO.png"
+    output_pdf = docs_dir / "DATABASE_ERD_DJANGO.pdf"
     
     print(f"\n📦 Generating ERD from Django models...")
     
@@ -231,7 +238,8 @@ erDiagram
 </body>
 </html>"""
     
-    output_html = Path(__file__).parent / "DATABASE_ERD.html"
+    docs_dir = PROJECT_ROOT / "docs"
+    output_html = docs_dir / "DATABASE_ERD.html"
     output_html.write_text(html_content, encoding='utf-8')
     print(f"✓ HTML preview created: {output_html}")
     print(f"  Open in browser: file://{output_html.absolute()}")
@@ -263,7 +271,8 @@ def main():
     print("=" * 60)
     print("\nGenerated files:")
     
-    for file in Path(__file__).parent.glob("DATABASE_ERD.*"):
+    docs_dir = PROJECT_ROOT / "docs"
+    for file in docs_dir.glob("DATABASE_ERD.*"):
         size = file.stat().st_size
         print(f"  • {file.name} ({size:,} bytes)")
     

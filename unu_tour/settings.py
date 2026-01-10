@@ -36,7 +36,10 @@ ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
 # Application definition
 
+# Application definition
+
 INSTALLED_APPS = [
+    # 'jazzmin',  # Removed for custom admin interface
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -49,6 +52,8 @@ INSTALLED_APPS = [
     # Local apps
     'tour_api',
 ]
+
+# JAZZMIN SETTINGS REMOVED
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -68,6 +73,7 @@ TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
+            BASE_DIR / 'templates',  # Added root templates dir
             BASE_DIR / 'tour_api' / 'templates',
         ],
         'APP_DIRS': True,

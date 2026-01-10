@@ -185,6 +185,7 @@ class SceneAdmin(admin.ModelAdmin):
 
 @admin.register(Hotspot)
 class HotspotAdmin(admin.ModelAdmin):
+    change_form_template = 'admin/tour_api/hotspot/change_form.html'
     list_display = (
         'from_scene', 
         'hotspot_type', 

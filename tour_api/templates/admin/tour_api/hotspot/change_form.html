@@ -1,0 +1,289 @@
+{% extends "admin/change_form.html" %}
+{% load static %}
+
+{% block extrahead %}
+{{ block.super }}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css" />
+<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.js"></script>
+<style>
+    /* UI Layout */
+    .visual-editor-container {
+        margin: 20px 0;
+        padding: 20px;
+        background: #fff;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    }
+
+    .editor-header {
+        margin-bottom: 15px;
+    }
+
+    .editor-header h2 {
+        margin: 0 0 5px 0;
+        color: #2c3e50;
+        font-size: 18px;
+    }
+
+    .editor-header p {
+        color: #7f8c8d;
+        margin: 0;
+        font-size: 14px;
+    }
+
+    #panorama-preview {
+        width: 100%;
+        height: 500px;
+        background: #f0f0f0;
+        border-radius: 8px;
+        position: relative;
+        overflow: hidden;
+        border: 2px solid #eee;
+    }
+
+    /* Helper & Status */
+    .preview-help {
+        margin-top: 15px;
+        padding: 10px 15px;
+        background: #e8f5e9;
+        border-radius: 4px;
+        font-size: 13px;
+        color: #2e7d32;
+        border-left: 4px solid #4caf50;
+    }
+
+    .loading-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(255, 255, 255, 0.9);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+        color: #555;
+    }
+
+    /* Hide specific form rows based on field names */
+    .field-pitch,
+    .field-yaw {
+        display: none !important;
+    }
+
+    /* Custom Hotspot Marker Styles */
+    .custom-hotspot {
+        width: 40px;
+        height: 40px;
+        cursor: pointer;
+        z-index: 2;
+        transition: transform 0.2s;
+    }
+
+    .custom-hotspot:hover {
+        transform: scale(1.2);
+        z-index: 3;
+    }
+
+    /* SVG Icons as encoded backgrounds or inline if possible (Pannellum supports div) */
+    .hotspot-icon {
+        width: 100%;
+        height: 100%;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
+    }
+</style>
+{% endblock %}
+
+{% block after_field_sets %}
+<!-- Custom Icons Definitions (Hidden) -->
+<div style="display:none;">
+    <!-- Scene Navigation Arrow -->
+    <svg id="icon-scene" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+        <path fill="#FFFFFF" stroke="#000" stroke-width="20"
+            d="M256 8c137 0 248 111 248 248S393 504 256 504 8 393 8 256 119 8 256 8zm-28.9 143.6l-75.5 72.4c-9.7 9.3-9.9 24.8-.4 34.3l75.5 75.5c9.2 9.2 24.1 9.2 33.3 0 9.2-9.2 9.2-24.1 0-33.3L230.7 267H376c13.3 0 24-10.7 24-24s-10.7-24-24-24H230.7l29.3-28.1c9.2-8.8 9.5-23.6.6-32.8-8.8-9.1-23.7-9.4-32.9-.5z"
+            style="fill:#3498db;" />
+    </svg>
+
+    <!-- Info Point Marker -->
+    <svg id="icon-info" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+        <path fill="#FFFFFF" stroke="#000" stroke-width="20"
+            d="M256 8C119.043 8 8 119.083 8 256c0 136.997 111.043 248 248 248s248-111.003 248-248C504 119.083 392.957 8 256 8zm0 110c23.196 0 42 18.804 42 42s-18.804 42-42 42-42-18.804-42-42 18.804-42 42-42zm56 254c0 6.627-5.373 12-12 12h-88c-6.627 0-12-5.373-12-12v-24c0-6.627 5.373-12 12-12h12v-64h-12c-6.627 0-12-5.373-12-12v-24c0-6.627 5.373-12 12-12h64c6.627 0 12 5.373 12 12v100h12c6.627 0 12 5.373 12 12v24z"
+            style="fill:#e74c3c;" />
+    </svg>
+</div>
+
+<div class="visual-editor-container">
+    <div class="editor-header">
+        <h2>📍 Visual Position Editor</h2>
+        <p>Click anywhere on the image below to place the hotspot marker. The coordinates will be saved automatically.
+        </p>
+    </div>
+
+    <div id="panorama-preview">
+        <div class="loading-overlay" id="loading-msg">
+            <span style="font-size: 24px;">🖼️</span>
+            <span style="margin-top: 10px;">Select a "From Scene" above to start</span>
+        </div>
+    </div>
+
+    <div class="preview-help">
+        ✅ <strong>Active Mode:</strong> Click image to update position. Form inputs are hidden for better UX.
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var viewer = null;
+
+        // Form Elements
+        var selectField = document.querySelector('#id_from_scene');
+        var pitchInput = document.querySelector('#id_pitch');
+        var yawInput = document.querySelector('#id_yaw');
+        var typeField = document.querySelector('#id_hotspot_type'); // to decide icon
+        var loadingMsg = document.getElementById('loading-msg');
+
+        if (!selectField) return;
+
+        // Custom Hotspot Function for Pannellum
+        function customHotspot(hotSpotDiv, args) {
+            hotSpotDiv.classList.add('custom-hotspot');
+
+            // Choose icon based on type from form (defaulting to scene arrow if not found)
+            var currentType = typeField ? typeField.value : 'scene';
+            var svgData = '';
+
+            if (currentType === 'info') {
+                // Info Icon (Red)
+                svgData = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="11" fill="#e74c3c" stroke="white" stroke-width="2"/><path d="M12 7V9M12 11V17" stroke="white" stroke-width="2" stroke-linecap="round"/></svg>';
+            } else {
+                // Pin/Target Icon (Blue) for navigation
+                svgData = '<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="10" fill="#3498db" fill-opacity="0.8" stroke="white" stroke-width="2"/><circle cx="12" cy="12" r="3" fill="white"/></svg>';
+            }
+
+            hotSpotDiv.innerHTML = svgData;
+
+            // Add tooltip title
+            // var span = document.createElement('span');
+            // span.innerHTML = args.text || "Selected Position";
+            // hotSpotDiv.appendChild(span);
+        }
+
+        // Reload viewer when Hotspot Type changes (to update icon)
+        if (typeField) {
+            typeField.addEventListener('change', function () {
+                if (viewer) {
+                    var currentPitch = parseFloat(pitchInput.value) || 0;
+                    var currentYaw = parseFloat(yawInput.value) || 0;
+                    // Re-add hotspot with new icon styling
+                    viewer.removeHotSpot('current-marker');
+                    if (pitchInput.value && yawInput.value) {
+                        viewer.addHotSpot({
+                            id: 'current-marker',
+                            pitch: currentPitch,
+                            yaw: currentYaw,
+                            createTooltipFunc: customHotspot,
+                            text: "New Position"
+                        });
+                    }
+                }
+            });
+        }
+
+        function loadPanorama(sceneId) {
+            if (!sceneId) return;
+
+            loadingMsg.style.display = 'flex';
+            loadingMsg.innerHTML = '<span style="font-size:24px;">↻</span><span>Loading panorama...</span>';
+
+            fetch(`/api/scenes/${sceneId}/`)
+                .then(response => {
+                    if (!response.ok) throw new Error("Could not load scene data");
+                    return response.json();
+                })
+                .then(data => {
+                    var imagePath = data.panorama_image;
+                    if (!imagePath) {
+                        loadingMsg.innerHTML = '<span>⚠️ No panorama image for this scene.</span>';
+                        return;
+                    }
+
+                    // Destroy old viewer
+                    if (viewer) {
+                        viewer.destroy();
+                    }
+
+                    loadingMsg.style.display = 'none';
+
+                    var initialPitch = parseFloat(pitchInput.value) || 0;
+                    var initialYaw = parseFloat(yawInput.value) || 0;
+                    var hasPosition = pitchInput.value !== "" && yawInput.value !== "";
+
+                    viewer = pannellum.viewer('panorama-preview', {
+                        type: 'equirectangular',
+                        panorama: imagePath,
+                        autoLoad: true,
+                        showControls: true,
+                        pitch: initialPitch,
+                        yaw: initialYaw,
+                        hfov: 100,
+                        backgroundColor: '#f0f0f0',
+                        hotSpots: hasPosition ? [{
+                            id: 'current-marker',
+                            pitch: initialPitch,
+                            yaw: initialYaw,
+                            createTooltipFunc: customHotspot,
+                            text: "Current Position"
+                        }] : []
+                    });
+
+                    // Click event to place/move marker
+                    viewer.on('mousedown', function (event) {
+                        if (event.ctrlKey) return; // Allow ctrl+click for debug if needed
+
+                        var coords = viewer.mouseEventToCoords(event);
+                        var newPitch = coords[0];
+                        var newYaw = coords[1];
+
+                        // Update Form Inputs
+                        pitchInput.value = newPitch.toFixed(4);
+                        yawInput.value = newYaw.toFixed(4);
+
+                        // Update Visual Marker
+                        viewer.removeHotSpot('current-marker'); // Remove old
+                        viewer.addHotSpot({
+                            id: 'current-marker',
+                            pitch: newPitch,
+                            yaw: newYaw,
+                            createTooltipFunc: customHotspot,
+                            text: "New Position"
+                        });
+
+                        // Optional: Center view on click? No, might be annoying.
+                        console.log("New Position:", newPitch, newYaw);
+                    });
+                })
+                .catch(err => {
+                    console.error(err);
+                    loadingMsg.style.display = 'flex';
+                    loadingMsg.textContent = 'Error: ' + err.message;
+                });
+        }
+
+        // Listen for scene changes
+        if (window.jQuery) {
+            window.jQuery(selectField).on('change', function () { loadPanorama(this.value); });
+        } else {
+            selectField.addEventListener('change', function () { loadPanorama(this.value); });
+        }
+
+        // Load initial
+        if (selectField.value) {
+            loadPanorama(selectField.value);
+        }
+    });
+</script>
+{{ block.super }}
+{% endblock %}

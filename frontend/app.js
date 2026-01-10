@@ -225,15 +225,14 @@ function initializePanoramaViewer(scene, withIntro = false) {
             const hotspotType = hotspot.hotspot_type || hotspot.type;
 
             if (hotspotType === 'scene' || hotspotType === 'floor') {
-                // Navigation hotspot - arrow marker
+                // Navigation hotspot (Street View Arrow)
                 const targetSlug = hotspot.to_scene_slug;
                 const tooltipText = hotspot.text || 'Navigate';
 
                 hotspots.push({
                     pitch: parseFloat(hotspot.pitch),
                     yaw: parseFloat(hotspot.yaw),
-                    type: 'info',  // Use 'info' type for custom styling
-                    cssClass: 'custom-nav-hotspot',
+                    cssClass: 'custom-hotspot-arrow', // CORRECTED CLASS NAME
                     clickHandlerFunc: (e) => {
                         e.stopPropagation();
                         if (targetSlug) {
@@ -242,42 +241,39 @@ function initializePanoramaViewer(scene, withIntro = false) {
                         }
                     },
                     createTooltipFunc: (hotSpotDiv) => {
-                        hotSpotDiv.style.pointerEvents = 'auto';
-                        hotSpotDiv.style.cursor = 'pointer';
+                        hotSpotDiv.classList.add('custom-hotspot-arrow'); // CORRECTED CLASS NAME
+
+                        // Tooltip only
                         const tooltip = document.createElement('div');
                         tooltip.classList.add('custom-tooltip');
                         tooltip.textContent = tooltipText;
                         hotSpotDiv.appendChild(tooltip);
-                        hotSpotDiv.classList.add('has-tooltip');
                     }
                 });
             } else if (hotspotType === 'info') {
-                // Info hotspot - info icon
+                // Info hotspot
                 const infoTitle = hotspot.text || 'Info';
                 const infoDesc = hotspot.info_description || '';
                 const hPitch = parseFloat(hotspot.pitch) || 0;
                 const hYaw = parseFloat(hotspot.yaw) || 0;
 
-                console.log(`📍 Adding info hotspot: "${infoTitle}" at pitch=${hPitch}, yaw=${hYaw}`);
-
                 hotspots.push({
                     pitch: hPitch,
                     yaw: hYaw,
-                    type: 'info',
-                    cssClass: 'custom-info-hotspot',
+                    cssClass: 'custom-hotspot-info', // CSS handles the icon image
                     clickHandlerFunc: (e) => {
                         e.stopPropagation();
                         console.log('ℹ️ Showing info:', infoTitle);
                         showInfoPopup(infoTitle, infoDesc);
                     },
                     createTooltipFunc: (hotSpotDiv) => {
-                        hotSpotDiv.style.pointerEvents = 'auto';
-                        hotSpotDiv.style.cursor = 'pointer';
+                        hotSpotDiv.classList.add('custom-hotspot-info'); // Reinforce class
+
+                        // Tooltip only
                         const tooltip = document.createElement('div');
                         tooltip.classList.add('custom-tooltip');
                         tooltip.textContent = infoTitle;
                         hotSpotDiv.appendChild(tooltip);
-                        hotSpotDiv.classList.add('has-tooltip');
                     }
                 });
             }

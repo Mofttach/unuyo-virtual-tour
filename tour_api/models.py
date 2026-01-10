@@ -17,11 +17,16 @@ class Scene(models.Model):
         help_text="Deskripsi lengkap dan menarik tentang lokasi ini"
     )
     
-    # Building & Floor Structure (NEW - Multi-floor support)
+    # Building & Floor Structure
+    BUILDING_CHOICES = [
+        ('Gedung Utama', 'Gedung Utama'),
+        ('Gedung MBZ CFS', 'Gedung MBZ CFS'),
+    ]
     building = models.CharField(
         max_length=100,
+        choices=BUILDING_CHOICES,
         default="Gedung Utama",
-        help_text="Nama gedung (e.g., 'Gedung Utama', 'Gedung A', 'Gedung B')"
+        help_text="Pilih gedung lokasi scene"
     )
     floor = models.IntegerField(
         null=True,
