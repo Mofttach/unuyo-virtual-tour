@@ -7,7 +7,12 @@
 // CONFIGURATION
 // =================================================================
 const CONFIG = {
-    apiBaseUrl: 'http://127.0.0.1:8000/api',
+    // Check if API_BASE_URL is defined globally (e.g. from environment config)
+    // Otherwise check if we are on localhost
+    apiBaseUrl: window.API_BASE_URL ||
+        (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost'
+            ? 'http://127.0.0.1:8000/api'
+            : '/api'), // Relative path for production where front/back are on same domain
     endpoints: {
         scenes: '/scenes/',
         sceneDetail: (slug) => `/scenes/${slug}/`,
@@ -31,21 +36,21 @@ const DOM = {
     // Landing page
     landingPage: document.getElementById('landing-page'),
     galleryGrid: document.getElementById('gallery-grid'),
-    
+
     // Viewer
     tourViewer: document.getElementById('tour-viewer'),
     panoramaViewer: document.getElementById('panorama-viewer'),
     viewerLoading: document.getElementById('viewer-loading'),
-    
+
     // Info sidebar
     viewerTitle: document.getElementById('viewer-title'),
     viewerLocation: document.getElementById('viewer-location'),
     viewerDate: document.getElementById('viewer-date'),
     viewerDescription: document.getElementById('viewer-description'),
-    
+
     // Buttons
     backToGalleryBtn: document.getElementById('back-to-gallery'),
-    
+
     // Loading screen
     loadingScreen: document.getElementById('loading-screen')
 };
@@ -61,12 +66,12 @@ async function fetchAPI(endpoint) {
     try {
         const url = `${CONFIG.apiBaseUrl}${endpoint}`;
         console.log('🌐 Fetching:', url);
-        
+
         const response = await fetch(url);
         if (!response.ok) {
             throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const data = await response.json();
         return data;
     } catch (error) {
@@ -102,13 +107,13 @@ async function loadScene(slug) {
         const scene = await fetchAPI(CONFIG.endpoints.sceneDetail(slug));
         state.currentScene = scene;
         console.log('✅ Loaded scene:', scene.title);
-        
+
         // Initialize viewer
         initializePanoramaViewer(scene);
-        
+
         // Update info
         updateSceneInfo(scene);
-        
+
     } catch (error) {
         console.error('Failed to load scene:', error);
         alert('Gagal memuat lokasi.');
@@ -126,7 +131,7 @@ async function loadScene(slug) {
  */
 function renderGallery() {
     if (!DOM.galleryGrid) return;
-    
+
     DOM.galleryGrid.innerHTML = state.scenes.map(scene => `
         <div class="gallery-item group cursor-pointer" onclick="openScene('${scene.slug}')">
             <div class="relative overflow-hidden rounded-2xl bg-gray-800">
@@ -182,10 +187,10 @@ function initializePanoramaViewer(scene) {
         state.viewer.destroy();
         state.viewer = null;
     }
-    
+
     // Build hotspots for info points only (NO navigation)
     const hotspots = [];
-    
+
     if (scene.hotspots && Array.isArray(scene.hotspots)) {
         scene.hotspots.forEach(hotspot => {
             // Only add info hotspots, skip link hotspots
@@ -200,7 +205,7 @@ function initializePanoramaViewer(scene) {
             }
         });
     }
-    
+
     // Pannellum configuration
     const config = {
         type: 'equirectangular',
@@ -208,21 +213,21 @@ function initializePanoramaViewer(scene) {
         autoLoad: true,
         autoRotate: parseFloat(scene.auto_rotate_speed) || -2,
         autoRotateInactivityDelay: parseInt(scene.auto_rotate_delay) || 3000,
-        
+
         // Camera settings
         pitch: parseFloat(scene.initial_pitch) || 0,
         yaw: parseFloat(scene.initial_yaw) || 0,
         hfov: parseFloat(scene.initial_hfov) || 100,
-        
+
         // Limits
         minHfov: parseFloat(scene.min_hfov) || 50,
         maxHfov: parseFloat(scene.max_hfov) || 120,
         minPitch: parseFloat(scene.min_pitch) || -90,
         maxPitch: parseFloat(scene.max_pitch) || 90,
-        
+
         // Hotspots (info only)
         hotSpots: hotspots,
-        
+
         // UI settings
         showControls: true,
         showFullscreenCtrl: true,
@@ -230,12 +235,12 @@ function initializePanoramaViewer(scene) {
         mouseZoom: true,
         draggable: true,
         keyboardZoom: true,
-        
+
         // Compass
         compass: scene.show_compass || false,
         northOffset: parseFloat(scene.north_offset) || 0
     };
-    
+
     console.log('🎬 Initializing Pannellum viewer...');
     state.viewer = pannellum.viewer(DOM.panoramaViewer, config);
 }
@@ -269,12 +274,12 @@ function openScene(slug) {
     if (DOM.landingPage) {
         DOM.landingPage.classList.add('hidden');
     }
-    
+
     // Show viewer
     if (DOM.tourViewer) {
         DOM.tourViewer.classList.remove('hidden');
     }
-    
+
     // Load scene
     loadScene(slug);
 }
@@ -288,17 +293,17 @@ function backToGallery() {
         state.viewer.destroy();
         state.viewer = null;
     }
-    
+
     // Hide viewer
     if (DOM.tourViewer) {
         DOM.tourViewer.classList.add('hidden');
     }
-    
+
     // Show landing page
     if (DOM.landingPage) {
         DOM.landingPage.classList.remove('hidden');
     }
-    
+
     state.currentScene = null;
 }
 
@@ -344,14 +349,14 @@ function setupEventListeners() {
     if (DOM.backToGalleryBtn) {
         DOM.backToGalleryBtn.addEventListener('click', backToGallery);
     }
-    
+
     // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
         // ESC - Back to gallery
         if (e.key === 'Escape' && state.currentScene) {
             backToGallery();
         }
-        
+
         // F - Fullscreen
         if (e.key === 'f' || e.key === 'F') {
             if (state.viewer) {
@@ -370,13 +375,13 @@ function setupEventListeners() {
  */
 async function initApp() {
     console.log('🚀 Initializing Virtual Tour App...');
-    
+
     // Setup event listeners
     setupEventListeners();
-    
+
     // Load scenes
     await loadScenes();
-    
+
     console.log('✅ App initialized successfully!');
 }
 
