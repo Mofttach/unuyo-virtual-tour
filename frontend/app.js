@@ -1,7 +1,29 @@
 /**
- * Virtual Tour UNU Yogyakarta - Simple Version
- * Konsep: One scene per view, NO hotspot navigation, Simple info points
+ * Virtual Tour UNU Yogyakarta - Enhanced Version
+ * Features: Interactive hotspot navigation, Info points, Floor navigation
  */
+
+// Helper function untuk show info popup
+function showInfoPopup(title, description) {
+    // Check if popup already exists
+    let popup = document.getElementById('info-popup');
+    if (!popup) {
+        popup = document.createElement('div');
+        popup.id = 'info-popup';
+        popup.className = 'info-popup';
+        document.body.appendChild(popup);
+    }
+
+    popup.innerHTML = `
+        <div class="info-popup-content">
+            <button class="info-popup-close" onclick="document.getElementById('info-popup').classList.remove('active')">&times;</button>
+            <h3>${title}</h3>
+            <p>${description || 'Tidak ada deskripsi.'}</p>
+        </div>
+    `;
+
+    popup.classList.add('active');
+}
 
 // =================================================================
 // CONFIGURATION
@@ -28,6 +50,9 @@ const state = {
     viewer: null,
     loading: false
 };
+
+// Expose state globally for inline scripts
+window.state = state;
 
 // =================================================================
 // DOM ELEMENTS
@@ -111,9 +136,12 @@ async function loadScene(slug) {
         // Initialize viewer
         initializePanoramaViewer(scene);
 
-        // Update info
-        updateSceneInfo(scene);
 
+        // Update UI
+        updateLocationBadge(scene);
+        updateSceneInfo(scene);
+        if (typeof populateSceneMenu === 'function') populateSceneMenu(); // Refresh menu active state
+        if (typeof populateThumbnailNav === 'function') populateThumbnailNav(); // Refresh thumbnail active state
     } catch (error) {
         console.error('Failed to load scene:', error);
         alert('Gagal memuat lokasi.');
@@ -180,60 +208,116 @@ function renderGallery() {
 
 /**
  * Initialize Pannellum viewer with scene data
+ * @param {Object} scene - Scene data from API
+ * @ param {Boolean} withIntro - Enable intro animation (zoom from sky)
  */
-function initializePanoramaViewer(scene) {
+function initializePanoramaViewer(scene, withIntro = false) {
     // Destroy existing viewer if exists
     if (state.viewer) {
         state.viewer.destroy();
         state.viewer = null;
     }
-
-    // Build hotspots for info points only (NO navigation)
+    // Build hotspots for all types with clear markers
     const hotspots = [];
 
     if (scene.hotspots && Array.isArray(scene.hotspots)) {
         scene.hotspots.forEach(hotspot => {
-            // Only add info hotspots, skip link hotspots
-            if (hotspot.type === 'info') {
+            const hotspotType = hotspot.hotspot_type || hotspot.type;
+
+            if (hotspotType === 'scene' || hotspotType === 'floor') {
+                // Navigation hotspot - arrow marker
+                const targetSlug = hotspot.to_scene_slug;
+                const tooltipText = hotspot.text || 'Navigate';
+
                 hotspots.push({
                     pitch: parseFloat(hotspot.pitch),
                     yaw: parseFloat(hotspot.yaw),
+                    type: 'info',  // Use 'info' type for custom styling
+                    cssClass: 'custom-nav-hotspot',
+                    clickHandlerFunc: (e) => {
+                        e.stopPropagation();
+                        if (targetSlug) {
+                            console.log('🔗 Navigating to:', targetSlug);
+                            loadScene(targetSlug);
+                        }
+                    },
+                    createTooltipFunc: (hotSpotDiv) => {
+                        hotSpotDiv.style.pointerEvents = 'auto';
+                        hotSpotDiv.style.cursor = 'pointer';
+                        const tooltip = document.createElement('div');
+                        tooltip.classList.add('custom-tooltip');
+                        tooltip.textContent = tooltipText;
+                        hotSpotDiv.appendChild(tooltip);
+                        hotSpotDiv.classList.add('has-tooltip');
+                    }
+                });
+            } else if (hotspotType === 'info') {
+                // Info hotspot - info icon
+                const infoTitle = hotspot.text || 'Info';
+                const infoDesc = hotspot.info_description || '';
+                const hPitch = parseFloat(hotspot.pitch) || 0;
+                const hYaw = parseFloat(hotspot.yaw) || 0;
+
+                console.log(`📍 Adding info hotspot: "${infoTitle}" at pitch=${hPitch}, yaw=${hYaw}`);
+
+                hotspots.push({
+                    pitch: hPitch,
+                    yaw: hYaw,
                     type: 'info',
-                    text: hotspot.text,
-                    cssClass: 'custom-info-hotspot'
+                    cssClass: 'custom-info-hotspot',
+                    clickHandlerFunc: (e) => {
+                        e.stopPropagation();
+                        console.log('ℹ️ Showing info:', infoTitle);
+                        showInfoPopup(infoTitle, infoDesc);
+                    },
+                    createTooltipFunc: (hotSpotDiv) => {
+                        hotSpotDiv.style.pointerEvents = 'auto';
+                        hotSpotDiv.style.cursor = 'pointer';
+                        const tooltip = document.createElement('div');
+                        tooltip.classList.add('custom-tooltip');
+                        tooltip.textContent = infoTitle;
+                        hotSpotDiv.appendChild(tooltip);
+                        hotSpotDiv.classList.add('has-tooltip');
+                    }
                 });
             }
         });
     }
 
+    // DEBUG: Log hotspots
+    console.log('🔥 Hotspots to render:', hotspots);
+
+    // Set initial camera position
+    const initialPitch = withIntro ? 90 : parseFloat(scene.initial_pitch) || 0;  // Start from sky if intro
+    const initialYaw = parseFloat(scene.initial_yaw) || 0;
+    const initialHfov = withIntro ? 180 : parseFloat(scene.initial_hfov) || 100; // Wide FOV for little planet effect
     // Pannellum configuration
     const config = {
         type: 'equirectangular',
         panorama: scene.panorama_image,
         autoLoad: true,
-        autoRotate: parseFloat(scene.auto_rotate_speed) || -2,
+        autoRotate: withIntro ? false : parseFloat(scene.auto_rotate_speed) || -2, // Disable during intro
         autoRotateInactivityDelay: parseInt(scene.auto_rotate_delay) || 3000,
 
         // Camera settings
-        pitch: parseFloat(scene.initial_pitch) || 0,
-        yaw: parseFloat(scene.initial_yaw) || 0,
-        hfov: parseFloat(scene.initial_hfov) || 100,
-
+        pitch: initialPitch,
+        yaw: initialYaw,
+        hfov: initialHfov,
         // Limits
         minHfov: parseFloat(scene.min_hfov) || 50,
-        maxHfov: parseFloat(scene.max_hfov) || 120,
+        maxHfov: withIntro ? 180 : parseFloat(scene.max_hfov) || 120, // Allow extreme FOV for intro
         minPitch: parseFloat(scene.min_pitch) || -90,
         maxPitch: parseFloat(scene.max_pitch) || 90,
 
         // Hotspots (info only)
         hotSpots: hotspots,
 
-        // UI settings
-        showControls: true,
-        showFullscreenCtrl: true,
-        showZoomCtrl: true,
-        mouseZoom: true,
-        draggable: true,
+        // UI settings - USE CUSTOM CONTROLS (disable Pannellum defaults)
+        showControls: false, // Hide default controls, use custom buttons
+        showFullscreenCtrl: false,
+        showZoomCtrl: false,
+        mouseZoom: true, // Keep mouse zoom enabled
+        draggable: !withIntro, // Disable drag during intro
         keyboardZoom: true,
 
         // Compass
@@ -243,6 +327,42 @@ function initializePanoramaViewer(scene) {
 
     console.log('🎬 Initializing Pannellum viewer...');
     state.viewer = pannellum.viewer(DOM.panoramaViewer, config);
+
+    // Start intro animation if requested
+    if (withIntro && window.IntroAnimation) {
+        // Wait for viewer to fully load
+        state.viewer.on('load', () => {
+            console.log('🎭 Starting intro animation...');
+
+            // Create intro animation instance
+            const introAnim = window.createIntroAnimation(state.viewer, {
+                duration: 3500,          // 3.5 seconds
+                startFOV: 180,           // Little planet
+                endFOV: 100,             // Normal view
+                startPitch: 90,          // Sky
+                endPitch: 0,             // Horizontal
+                easing: 'easeInOutCubic',
+                delay: 300,
+                onComplete: () => {
+                    // Re-enable controls and interactions
+                    state.viewer.setUpdate(true);
+
+                    // Start auto-rotate after intro
+                    if (parseFloat(scene.auto_rotate_speed) || -2) {
+                        setTimeout(() => {
+                            state.viewer.startAutoRotate(parseFloat(scene.auto_rotate_speed) || -2);
+                        }, 1000);
+                    }
+                    // Populate UI
+                    populateSceneMenu();
+                    populateThumbnailNav();
+                }
+            });
+
+            // Store animation instance
+            state.currentIntroAnimation = introAnim;
+        });
+    }
 }
 
 /**
@@ -267,9 +387,89 @@ function updateSceneInfo(scene) {
 // =================================================================
 
 /**
+ * Toggle info panel visibility
+ */
+function toggleInfoPanel() {
+    const infoSidebar = document.getElementById('info-sidebar');
+    const toggleBtn = document.getElementById('toggle-info-btn');
+
+    if (infoSidebar) {
+        const isHidden = infoSidebar.classList.contains('hidden');
+
+        if (isHidden) {
+            // Show panel
+            infoSidebar.classList.remove('hidden');
+            if (toggleBtn) {
+                toggleBtn.innerHTML = '<i class="fas fa-times text-lg"></i><span class="text-sm">Tutup</span>';
+            }
+        } else {
+            // Hide panel
+            infoSidebar.classList.add('hidden');
+            if (toggleBtn) {
+                toggleBtn.innerHTML = '<i class="fas fa-info-circle text-lg"></i><span class="text-sm">Info</span>';
+            }
+        }
+    }
+}
+
+/**
+ * Open featured scene directly (for "Explore Campus" button)
+ * With optional intro animation
+ */
+async function openFeaturedScene(withIntro = true) {
+    try {
+        // Show loading screen
+        showLoading(true);
+
+        // Fetch featured scene
+        const scene = await fetchAPI('/scenes/featured/');
+
+        if (!scene) {
+            console.error('No featured scene found');
+            alert('Belum ada scene yang ditandai sebagai starting point');
+            return;
+        }
+
+        // Hide landing page
+        if (DOM.landingPage) {
+            DOM.landingPage.classList.add('hidden');
+        }
+
+        // Show viewer
+        if (DOM.tourViewer) {
+            DOM.tourViewer.classList.remove('hidden');
+        }
+
+        // Hide main loading screen
+        showLoading(false);
+
+        // Load scene
+        state.currentScene = scene;
+        console.log('✅ Opening featured scene:', scene.title);
+
+        // Initialize viewer
+        showViewerLoading(true);
+        initializePanoramaViewer(scene, withIntro);
+
+        // Update UI
+        updateSceneInfo(scene);
+        updateLocationBadge(scene);
+        populateSceneMenu();
+        populateThumbnailNav();
+
+        showViewerLoading(false);
+
+    } catch (error) {
+        console.error('Failed to load featured scene:', error);
+        alert('Gagal memuat scene pembuka. Periksa koneksi backend.');
+        showLoading(false);
+    }
+}
+
+/**
  * Open scene viewer
  */
-function openScene(slug) {
+function openScene(slug, withIntro = false) {
     // Hide landing page
     if (DOM.landingPage) {
         DOM.landingPage.classList.add('hidden');
@@ -398,3 +598,378 @@ if (document.readyState === 'loading') {
 window.openScene = openScene;
 window.backToGallery = backToGallery;
 window.closeTour = backToGallery; // Alias for HTML inline script
+window.toggleInfoPanel = toggleInfoPanel;
+window.openFeaturedScene = openFeaturedScene; // NEW - For "Explore Campus" button
+
+// =================================================================
+// THUMBNAIL NAVIGATION (BINUS-style) 
+// =================================================================
+
+/**
+ * Load thumbnails into navigation bar
+ */
+async function loadThumbnailNav() {
+    const container = document.getElementById('thumbnail-container');
+    if (!container || !state.scenes || state.scenes.length === 0) {
+        return;
+    }
+
+    // Create thumbnail elements
+    container.innerHTML = state.scenes.map(scene => `
+        <div class="scene-thumbnail ${scene.slug === state.currentScene?.slug ? 'active' : ''}" 
+             data-slug="${scene.slug}"
+             onclick="switchScene('${scene.slug}')">
+            <img src="${scene.thumbnail || scene.panorama_image}" 
+                 alt="${scene.title}"
+                 loading="lazy">
+            <div class="thumbnail-title">${scene.title}</div>
+        </div>
+    `).join('');
+
+    // Scroll to active thumbnail
+    setTimeout(() => scrollToActiveThumbnail(), 300);
+}
+
+/**
+ * Switch to different scene from thumbnail
+ */
+function switchScene(slug) {
+    if (!slug || slug === state.currentScene?.slug) return;
+
+    console.log(`🔄 Switching to scene: ${slug}`);
+
+    // Load new scene
+    loadScene(slug, false);
+
+    // Update active thumbnail
+    updateActiveThumbnail(slug);
+
+    // Scroll to active
+    setTimeout(() => scrollToActiveThumbnail(), 100);
+}
+
+/**
+ * Update active thumbnail highlight
+ */
+function updateActiveThumbnail(slug) {
+    document.querySelectorAll('.scene-thumbnail').forEach(thumb => {
+        thumb.classList.remove('active');
+        if (thumb.dataset.slug === slug) {
+            thumb.classList.add('active');
+        }
+    });
+}
+
+/**
+ * Scroll thumbnails left/right
+ */
+function scrollThumbnails(direction) {
+    const container = document.getElementById('thumbnail-container');
+    if (!container) return;
+
+    const scrollAmount = 300;
+
+    if (direction === 'left') {
+        container.scrollLeft -= scrollAmount;
+    } else {
+        container.scrollLeft += scrollAmount;
+    }
+}
+
+/**
+ * Auto-scroll to active thumbnail
+ */
+function scrollToActiveThumbnail() {
+    const container = document.getElementById('thumbnail-container');
+    const activeThumb = container?.querySelector('.scene-thumbnail.active');
+
+    if (activeThumb && container) {
+        const containerWidth = container.offsetWidth;
+        const thumbLeft = activeThumb.offsetLeft;
+        const thumbWidth = activeThumb.offsetWidth;
+
+        // Calculate scroll position to center the active thumbnail
+        const scrollPosition = thumbLeft - (containerWidth / 2) + (thumbWidth / 2);
+
+        container.scrollTo({
+            left: scrollPosition,
+            behavior: 'smooth'
+        });
+    }
+}
+
+/**
+ * Update location badge in header (now shows scene title)
+ */
+function updateLocationBadge(scene) {
+    const badge = document.getElementById('location-badge');
+    if (badge && scene) {
+        // Show scene title only (simpler than location_label)
+        badge.textContent = scene.title;
+        // Show badge when we have content
+        badge.style.display = 'block';
+
+        // Update menu active state too
+        if (typeof populateSceneMenu === 'function') {
+            populateSceneMenu();
+        }
+    } else if (badge) {
+        // Hide badge if no scene
+        badge.style.display = 'none';
+    }
+}
+
+/**
+ * Toggle scene navigation menu (NUS-style)
+ */
+function toggleSceneMenu() {
+    const menu = document.getElementById('scene-menu-dropdown');
+    const toggle = document.getElementById('menu-toggle');
+
+    if (!menu || !toggle) return;
+
+    const isShown = menu.classList.contains('show');
+
+    if (isShown) {
+        // Close menu
+        menu.classList.remove('show');
+        toggle.classList.remove('active');
+    } else {
+        // Open menu
+        menu.classList.add('show');
+        toggle.classList.add('active');
+
+        // Populate menu if not already done or if scenes updated
+        if (state.scenes && state.scenes.length > 0) {
+            populateSceneMenu();
+        }
+    }
+}
+
+/**
+ * Close scene menu
+ */
+function closeSceneMenu() {
+    const menu = document.getElementById('scene-menu-dropdown');
+    const toggle = document.getElementById('menu-toggle');
+
+    if (menu) menu.classList.remove('show');
+    if (toggle) toggle.classList.remove('active');
+}
+
+/**
+ * Populate scene navigation menu organized by floor NUMBER (NUS-style)
+ * Menu shows: Lantai 1, Lantai 2, ... Lantai 9, Area Outdoor
+ */
+function populateSceneMenu() {
+    const menuContainer = document.getElementById('scene-menu-dropdown');
+    if (!menuContainer || !state.scenes) return;
+
+    // Group scenes by floor NUMBER only (not building)
+    const scenesByFloor = {};
+    const outdoorScenes = [];
+
+    state.scenes.forEach(scene => {
+        if (scene.floor && scene.floor > 0 && scene.floor <= 9) {
+            const floorKey = scene.floor; // Just the number
+            if (!scenesByFloor[floorKey]) {
+                scenesByFloor[floorKey] = [];
+            }
+            scenesByFloor[floorKey].push(scene);
+        } else {
+            outdoorScenes.push(scene);
+        }
+    });
+
+    // Build menu HTML - sorted by floor number
+    let menuHTML = '';
+
+    // Add floor-organized scenes (1-9)
+    Object.keys(scenesByFloor)
+        .map(Number)
+        .sort((a, b) => a - b)
+        .forEach(floorNum => {
+            menuHTML += `<div class="menu-floor-header">Lantai ${floorNum}</div>`;
+            scenesByFloor[floorNum].forEach(scene => {
+                const isActive = scene.slug === state.currentScene?.slug ? 'active' : '';
+                menuHTML += `
+                    <div class="menu-item ${isActive}" onclick="selectSceneFromMenu('${scene.slug}')">
+                        <i class="menu-item-icon fas fa-door-open"></i>
+                        <span class="menu-item-text">${scene.title}</span>
+                    </div>
+                `;
+            });
+        });
+
+    // Add outdoor/general scenes
+    if (outdoorScenes.length > 0) {
+        menuHTML += `<div class="menu-floor-header">Area Outdoor</div>`;
+        outdoorScenes.forEach(scene => {
+            const isActive = scene.slug === state.currentScene?.slug ? 'active' : '';
+            menuHTML += `
+                <div class="menu-item ${isActive}" onclick="selectSceneFromMenu('${scene.slug}')">
+                    <i class="menu-item-icon fas fa-map-marker-alt"></i>
+                    <span class="menu-item-text">${scene.title}</span>
+                </div>
+            `;
+        });
+    }
+
+    menuContainer.innerHTML = menuHTML;
+}
+
+/**
+ * Select scene from menu dropdown
+ */
+function selectSceneFromMenu(slug) {
+    if (!slug || slug === state.currentScene?.slug) {
+        closeSceneMenu();
+        return;
+    }
+
+    console.log(`📍 Selected scene from menu: ${slug}`);
+
+    // Close menu
+    closeSceneMenu();
+
+    // Switch to scene
+    switchScene(slug);
+}
+
+// Export menu functions
+window.toggleSceneMenu = toggleSceneMenu;
+window.closeSceneMenu = closeSceneMenu;
+window.selectSceneFromMenu = selectSceneFromMenu;
+window.populateSceneMenu = populateSceneMenu;
+
+/**
+ * Thumbnail Navigation Logic
+ */
+function populateThumbnailNav() {
+    const list = document.getElementById('thumbnail-list');
+    if (!list) return;
+
+    // Check if scenes exist
+    if (!state.scenes || state.scenes.length === 0) {
+        console.warn('⚠️ No scenes available to populate thumbnails');
+        return;
+    }
+
+    list.innerHTML = '';
+
+    // Group scenes locally (since scenesByFloor is not global)
+    const scenesByFloor = {};
+    const outdoorScenes = [];
+
+    state.scenes.forEach(scene => {
+        // Handle floor as number or string
+        const floorNum = parseInt(scene.floor);
+
+        if (!isNaN(floorNum) && floorNum > 0 && floorNum <= 9) {
+            if (!scenesByFloor[floorNum]) {
+                scenesByFloor[floorNum] = [];
+            }
+            scenesByFloor[floorNum].push(scene);
+        } else {
+            outdoorScenes.push(scene);
+        }
+    });
+
+    // Combine all scenes for the strip
+    const allScenes = [];
+
+    // Add floor scenes sorted
+    Object.keys(scenesByFloor)
+        .map(Number)
+        .sort((a, b) => a - b)
+        .forEach(floorNum => {
+            scenesByFloor[floorNum].forEach(scene => allScenes.push(scene));
+        });
+
+    // Add outdoor scenes
+    outdoorScenes.forEach(scene => allScenes.push(scene));
+
+    console.log(`🖼️ Populating thumbnails for ${allScenes.length} scenes`);
+
+    // Generate HTML
+    allScenes.forEach(scene => {
+        const isActive = scene.slug === state.currentScene?.slug ? 'active' : '';
+
+        // Try thumbnail first, then full image, then placeholder
+        let thumbUrl = scene.thumbnail || scene.image;
+
+        // Ensure URL is absolute if needed (though usually handled by backend)
+        if (thumbUrl && !thumbUrl.startsWith('http') && !thumbUrl.startsWith('/')) {
+            // If it's a relative path without leading slash, might need adjustment?
+            // Usually Django returns /media/...
+        }
+
+        if (!thumbUrl) {
+            console.warn(`⚠️ No image for scene: ${scene.title}`);
+            thumbUrl = 'https://via.placeholder.com/200x100?text=No+Image';
+        }
+
+        const item = document.createElement('div');
+        item.className = `thumbnail-item ${isActive}`;
+        item.onclick = () => switchScene(scene.slug);
+        item.innerHTML = `
+            <img src="${thumbUrl}" alt="${scene.title}" loading="lazy" onerror="this.src='https://via.placeholder.com/200x100?text=Error'">
+            <div class="thumbnail-title">${scene.title}</div>
+        `;
+        list.appendChild(item);
+    });
+}
+
+function scrollThumbnails(direction) {
+    const list = document.getElementById('thumbnail-list');
+    if (list) {
+        const scrollAmount = 300; // Scroll by approx 2 items
+        list.scrollBy({
+            left: direction * scrollAmount,
+            behavior: 'smooth'
+        });
+    }
+}
+
+// Export thumbnail functions
+window.populateThumbnailNav = populateThumbnailNav;
+window.scrollThumbnails = scrollThumbnails;
+
+// Export thumbnail navigation functions
+window.switchScene = switchScene;
+window.scrollThumbnails = scrollThumbnails;
+// window.openSceneSelector = openSceneSelector; // Removed: Function not defined
+window.updateLocationBadge = updateLocationBadge;
+window.loadThumbnailNav = loadThumbnailNav;
+
+// Zoom control functions
+window.zoomIn = function () {
+    console.log('🔍 Zoom In clicked!', state.viewer);
+    if (state.viewer) {
+        const currentHfov = state.viewer.getHfov();
+        console.log('Current HFOV:', currentHfov);
+        state.viewer.setHfov(Math.max(currentHfov - 10, 50));
+    } else {
+        console.error('❌ Viewer not initialized!');
+    }
+};
+
+window.zoomOut = function () {
+    console.log('🔍 Zoom Out clicked!', state.viewer);
+    if (state.viewer) {
+        const currentHfov = state.viewer.getHfov();
+        console.log('Current HFOV:', currentHfov);
+        state.viewer.setHfov(Math.min(currentHfov + 10, 120));
+    } else {
+        console.error('❌ Viewer not initialized!');
+    }
+};
+
+window.toggleFullscreen = function () {
+    console.log('🖥️ Fullscreen clicked!', state.viewer);
+    if (state.viewer) {
+        state.viewer.toggleFullscreen();
+    } else {
+        console.error('❌ Viewer not initialized!');
+    }
+};

@@ -160,7 +160,99 @@ const CONFIG = {
 1. Buka `frontend/index.html` dengan Live Server
 2. Drag untuk melihat sekeliling, scroll untuk zoom
 3. Klik hotspot untuk navigasi atau info
+
+## Production Deployment
+
+### Backend (Django)
+
+1. Generate SECRET_KEY baru:
+```bash
+python -c 'from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())'
+```
+
+2. Edit `.env` untuk production:
+```env
+SECRET_KEY=<generated-key>
+DEBUG=False
+ALLOWED_HOSTS=yourdomain.com
+DB_ENGINE=postgresql
+SECURE_SSL_REDIRECT=True
+SESSION_COOKIE_SECURE=True
+CSRF_COOKIE_SECURE=True
+```
+
+3. Setup database (PostgreSQL recommended)
+4. Collect static files: `python manage.py collectstatic`
+5. Deploy ke Render, Railway, atau platform lain
+
+### Frontend
+
+- Deploy `frontend/` folder ke Netlify, Vercel, atau GitHub Pages
+- Update API URL di `app.js`
+
+### Media Files
+
+Gunakan cloud storage untuk production:
+- Cloudinary (recommended)
+- Amazon S3
+- Google Cloud Storage
+
+## Troubleshooting
+
+**CORS Error:**
+- Gunakan Live Server, jangan buka file:// langsung
+- Check `CORS_ALLOWED_ORIGINS` di `.env`
+
+**Images not loading:**
+- Check file ada di `media/panoramas/` dan `media/thumbnails/`
+- Verify MEDIA_URL di settings.py
+
+**No scenes found:**
+- Run: `python generate_dummy_data.py`
+
+**API 404:**
+- Check `tour_api` ada di INSTALLED_APPS
+- Restart server
+
+## License
+
+MIT License
+
 ## Credits
+
+- Pannellum.js - 360 panorama viewer
+- Django & Django REST Framework
+- Tailwind CSS
+- Font Awesome
+
+---
+
+Developed by Universitas Nahdlatul Ulama Yogyakarta
+````
+
+## 📝 To-Do / Future Enhancements
+
+- [ ] Add audio guide untuk setiap lokasi
+- [ ] Implement map overview (2D floor plan)
+- [ ] Add VR mode support (WebXR)
+- [ ] Multi-language support (EN/ID)
+- [ ] Add 360° video support
+- [ ] Analytics & heatmap tracking
+- [ ] Social sharing features
+- [ ] PWA (Progressive Web App)
+
+## 👨‍💻 Developer
+
+**Universitas Nahdlatul Ulama Yogyakarta**  
+Virtual Tour Development Team
+
+## 📄 License
+
+MIT License - Feel free to use for educational purposes
+
+---
+
+## 🙏 Credits
 
 - **Pannellum** - 360° panorama viewer library
 - **Django** - Web framework
@@ -168,3 +260,10 @@ const CONFIG = {
 - **Picsum Photos** - Placeholder images (dummy data)
 - **Font Awesome** - Icons
 - **Google Fonts** - Typography
+
+---
+
+**🎓 Built for Academic Excellence**  
+*Universitas Nahdlatul Ulama Yogyakarta*
+
+⭐ **Star this repo** if you find it helpful!

@@ -1,0 +1,148 @@
+{% extends "admin/base.html" %}
+{% load static %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" href="{% static 'admin/css/custom-admin.css' %}">
+{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<style>
+    /* Enhanced Admin Header */
+    #header {
+        background: linear-gradient(135deg, #0a5f38 0%, #2c3e50 100%);
+        padding: 1.2rem 2rem;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    #branding h1 {
+        margin: 0;
+        font-weight: 600;
+        font-size: 1.6rem;
+        letter-spacing: -0.5px;
+    }
+    
+    #branding h1 a {
+        color: white;
+        text-decoration: none;
+    }
+    
+    #user-tools {
+        text-align: right;
+        padding: 0;
+        margin: 0;
+        font-size: 0.9rem;
+    }
+    
+    #user-tools a {
+        color: rgba(255,255,255,0.9);
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+    
+    #user-tools a:hover {
+        color: white;
+    }
+    
+    /* Content Container */
+    .colMS {
+        margin: 2rem auto;
+        max-width: 1400px;
+        padding: 0 2rem;
+    }
+    
+    /* Module styling */
+    .module {
+        background: white;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        margin-bottom: 1.5rem;
+        overflow: hidden;
+    }
+    
+    .module h2, .module caption {
+        background: #0a5f38;
+        color: white;
+        padding: 1rem 1.5rem;
+        margin: 0;
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+    
+    .module table {
+        width: 100%;
+    }
+    
+    /* Dashboard Module Styling */
+    #content-main .module {
+        margin-bottom: 2rem;
+    }
+    
+    #content-main .module h2 a {
+        color: white;
+        text-decoration: none;
+    }
+    
+    #content-main .module th {
+        background: #f8f9fa;
+        padding: 0.8rem;
+        text-align: left;
+        font-weight: 600;
+    }
+    
+    #content-main .module td {
+        padding: 0.8rem;
+        border-bottom: 1px solid #f0f0f0;
+    }
+    
+    /* Quick Actions Dashboard */
+    .dashboard-tools {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    
+    .dashboard-tool {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        transition: all 0.2s;
+    }
+    
+    .dashboard-tool:hover {
+        box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        transform: translateY(-2px);
+    }
+    
+    .dashboard-tool h3 {
+        margin: 0 0 0.5rem 0;
+        color: #0a5f38;
+        font-size: 1.1rem;
+    }
+    
+    .dashboard-tool p {
+        margin: 0;
+        color: #7f8c8d;
+        font-size: 0.9rem;
+    }
+    
+    .dashboard-tool a {
+        display: inline-block;
+        margin-top: 1rem;
+        padding: 0.6rem 1.2rem;
+        background: #0a5f38;
+        color: white;
+        text-decoration: none;
+        border-radius: 4px;
+        font-weight: 600;
+        transition: background 0.2s;
+    }
+    
+    .dashboard-tool a:hover {
+        background: #084a2d;
+    }
+</style>
+{% endblock %}

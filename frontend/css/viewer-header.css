@@ -1,0 +1,43 @@
+/**
+ * Viewer Header - NUS Style
+ * Compact, transparent background (no gradient)
+ */
+
+/* Main Header Container - SHORT & TRANSPARENT */
+.viewer-header {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: auto;
+    padding: 8px 13px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    z-index: 70;
+
+    /* Simple transparent - no gradient */
+    background: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(8px);
+}
+
+/* All interactive elements are clickable */
+.viewer-header>* {
+    pointer-events: auto;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .viewer-header {
+        padding: 8px 12px;
+        gap: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .viewer-header {
+        padding: 6px 10px;
+        gap: 8px;
+    }
+}

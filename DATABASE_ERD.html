@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ERD - Virtual Tour UNU Yogyakarta</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+        .subtitle {
+            color: #7f8c8d;
+            margin-bottom: 2rem;
+        }
+        .mermaid {
+            background: white;
+            padding: 1rem;
+            border-radius: 4px;
+        }
+        .info {
+            margin-top: 2rem;
+            padding: 1rem;
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            border-radius: 4px;
+        }
+        .info h3 {
+            margin-top: 0;
+            color: #2e7d32;
+        }
+        .info ul {
+            margin: 0.5rem 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Entity Relationship Diagram</h1>
+        <p class="subtitle">Virtual Tour UNU Yogyakarta - Database Schema</p>
+        
+        <div class="mermaid">
+erDiagram
+    SCENE ||--o{ HOTSPOT : "has many"
+    SCENE ||--o{ HOTSPOT : "referenced by"
+    
+    SCENE {
+        int id PK
+        string title
+        string slug UK
+        text description
+        string building
+        int floor "nullable"
+        string floor_description
+        int order
+        string location
+        date published_date
+        image panorama_image
+        image thumbnail
+        string author
+        boolean is_active
+        boolean is_featured
+        float initial_pitch
+        float initial_yaw
+        float initial_fov
+        datetime created_at
+        datetime updated_at
+    }
+    
+    HOTSPOT {
+        int id PK
+        int from_scene_id FK
+        int to_scene_id FK "nullable"
+        string hotspot_type "scene|info|floor"
+        float pitch
+        float yaw
+        string text
+        text info_description
+        datetime created_at
+    }
+        </div>
+        
+        <div class="info">
+            <h3>📊 Database Statistics</h3>
+            <ul>
+                <li><strong>Tables:</strong> 2 (Scene, Hotspot)</li>
+                <li><strong>Relationships:</strong> 1:N (One-to-Many)</li>
+                <li><strong>Total Fields:</strong> 28 fields</li>
+                <li><strong>Foreign Keys:</strong> 2 (from_scene_id, to_scene_id)</li>
+            </ul>
+        </div>
+        
+        <div class="info" style="background: #e3f2fd; border-left-color: #2196f3;">
+            <h3>🔗 Relationships</h3>
+            <ul>
+                <li><strong>Scene → Hotspot:</strong> One scene can have many hotspots</li>
+                <li><strong>Scene ← Hotspot:</strong> One scene can be referenced by many hotspots</li>
+                <li><strong>Cascade Delete:</strong> Deleting a scene will delete all its hotspots</li>
+            </ul>
+        </div>
+    </div>
+    
+    <script>
+        mermaid.initialize({ 
+            startOnLoad: true,
+            theme: 'default',
+            themeVariables: {
+                primaryColor: '#4caf50',
+                primaryTextColor: '#fff',
+                primaryBorderColor: '#388e3c',
+                lineColor: '#757575',
+                secondaryColor: '#2196f3',
+                tertiaryColor: '#fff'
+            }
+        });
+    </script>
+</body>
+</html>

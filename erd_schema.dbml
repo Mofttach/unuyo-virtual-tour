@@ -1,0 +1,132 @@
+// =============================================
+// DBML Schema - Virtual Tour UNU Yogyakarta
+// Database Markup Language for dbdiagram.io
+// 
+// Usage:
+// 1. Copy all content below
+// 2. Go to https://dbdiagram.io/d
+// 3. Paste and see instant ERD visualization
+// =============================================
+
+Project virtual_tour_unu {
+  database_type: 'SQLite'
+  Note: '''
+    # Virtual Tour UNU Yogyakarta
+    Database schema for 360° campus virtual tour system
+    
+    **Features:**
+    - 360° panoramic scenes
+    - Interactive hotspots
+    - Multi-floor navigation
+    - Info points
+  '''
+}
+
+// =============================================
+// Table: Scene (Lokasi Virtual Tour)
+// =============================================
+Table tour_api_scene {
+  id integer [pk, increment, note: 'Primary key']
+  
+  // Basic Information
+  title varchar(200) [not null, note: 'Nama lokasi']
+  slug varchar(250) [unique, not null, note: 'URL-friendly identifier']
+  description text [not null, note: 'Deskripsi lengkap']
+  
+  // Location Details
+  building varchar(100) [not null, default: 'Gedung Utama', note: 'Nama gedung']
+  floor integer [null, note: 'Nomor lantai (1-9) atau NULL untuk outdoor']
+  floor_description varchar(200) [null, note: 'Deskripsi singkat lantai']
+  order integer [not null, default: 0, note: 'Urutan tampilan']
+  location varchar(100) [not null, default: 'Yogyakarta', note: 'Kota/Kabupaten']
+  
+  // Media Files
+  panorama_image varchar(100) [not null, note: 'Path foto 360° (ratio 2:1)']
+  thumbnail varchar(100) [not null, note: 'Path thumbnail (ratio 16:9)']
+  
+  // Metadata
+  published_date date [not null, note: 'Tanggal publikasi']
+  author varchar(100) [not null, default: 'Tim Virtual Tour UNU', note: 'Nama fotografer']
+  is_active boolean [not null, default: true, note: 'Status aktif']
+  is_featured boolean [not null, default: false, note: 'Starting point (hanya 1)']
+  
+  // Viewer Configuration
+  initial_pitch float [not null, default: 0, note: 'Sudut vertikal (-90 to 90)']
+  initial_yaw float [not null, default: 0, note: 'Sudut horizontal (-180 to 180)']
+  initial_fov float [not null, default: 90, note: 'Field of view (50-120)']
+  
+  // Timestamps
+  created_at datetime [not null, default: `now()`]
+  updated_at datetime [not null, default: `now()`]
+  
+  Indexes {
+    (building, floor) [name: 'idx_scene_building_floor']
+    (is_active, is_featured) [name: 'idx_scene_active_featured']
+    slug [name: 'idx_scene_slug']
+  }
+  
+  Note: '''
+    **Business Rules:**
+    - Hanya boleh ada 1 scene dengan is_featured=TRUE
+    - floor harus 1-9 atau NULL untuk outdoor
+    - slug auto-generated dari title
+    
+    **Ordering:**
+    ORDER BY building, floor, order, title
+  '''
+}
+
+// =============================================
+// Table: Hotspot (Navigasi & Info Point)
+// =============================================
+Table tour_api_hotspot {
+  id integer [pk, increment, note: 'Primary key']
+  
+  // Foreign Keys
+  from_scene_id integer [not null, ref: > tour_api_scene.id, note: 'Scene yang memiliki hotspot']
+  to_scene_id integer [null, ref: > tour_api_scene.id, note: 'Scene tujuan (wajib jika type=scene)']
+  
+  // Hotspot Configuration
+  hotspot_type varchar(10) [not null, default: 'scene', note: 'Tipe: scene | info | floor']
+  pitch float [not null, note: 'Sudut vertikal (-90 to 90)']
+  yaw float [not null, note: 'Sudut horizontal (-180 to 180)']
+  
+  // Content
+  text varchar(100) [not null, note: 'Label hotspot']
+  info_description text [null, note: 'Deskripsi detail (untuk type=info)']
+  
+  // Timestamp
+  created_at datetime [not null, default: `now()`]
+  
+  Indexes {
+    from_scene_id [name: 'idx_hotspot_from_scene']
+    to_scene_id [name: 'idx_hotspot_to_scene']
+    hotspot_type [name: 'idx_hotspot_type']
+  }
+  
+  Note: '''
+    **Hotspot Types:**
+    - scene: Navigasi ke scene lain (to_scene_id WAJIB)
+    - info: Info point statis (info_description berisi konten)
+    - floor: Floor navigation (perpindahan lantai)
+    
+    **Business Rules:**
+    - Jika hotspot_type='scene' maka to_scene_id NOT NULL
+    - pitch: -90 hingga 90
+    - yaw: -180 hingga 180
+  '''
+}
+
+// =============================================
+// Relationships
+// =============================================
+Ref: tour_api_hotspot.from_scene_id > tour_api_scene.id [delete: cascade]
+Ref: tour_api_hotspot.to_scene_id > tour_api_scene.id [delete: cascade]
+
+// =============================================
+// Table Groups (Visual Organization)
+// =============================================
+TableGroup core_entities {
+  tour_api_scene
+  tour_api_hotspot
+}

@@ -1,8 +1,9 @@
 from django.db import models
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils.text import slugify
 
 class Scene(models.Model):
-    """Model untuk setiap lokasi 360° di kampus UNU Yogyakarta"""
+    """Model untuk setiap lokasi 360° di kampus UNU Yogyakarta dengan support multi-floor navigation"""
     
     # Basic Information
     title = models.CharField(
@@ -14,6 +15,28 @@ class Scene(models.Model):
     # Content
     description = models.TextField(
         help_text="Deskripsi lengkap dan menarik tentang lokasi ini"
+    )
+    
+    # Building & Floor Structure (NEW - Multi-floor support)
+    building = models.CharField(
+        max_length=100,
+        default="Gedung Utama",
+        help_text="Nama gedung (e.g., 'Gedung Utama', 'Gedung A', 'Gedung B')"
+    )
+    floor = models.IntegerField(
+        null=True,
+        blank=True,
+        validators=[MinValueValidator(1), MaxValueValidator(9)],
+        help_text="Nomor lantai (1-9). Kosongkan untuk area outdoor/luar gedung."
+    )
+    floor_description = models.CharField(
+        max_length=200,
+        blank=True,
+        help_text="Deskripsi singkat lantai (e.g., 'Ruang Kuliah & Laboratorium')"
+    )
+    order = models.IntegerField(
+        default=0,
+        help_text="Urutan scene dalam lantai yang sama (untuk sorting). Angka lebih kecil muncul lebih dulu."
     )
     
     # Location & Date
@@ -50,7 +73,7 @@ class Scene(models.Model):
     )
     is_featured = models.BooleanField(
         default=False,
-        help_text="Jadikan scene pertama yang muncul?"
+        help_text="Jadikan scene pertama yang muncul (starting point)?"
     )
     
     # Pannellum Settings (Optional advanced settings)
@@ -72,9 +95,13 @@ class Scene(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
-        ordering = ['-is_featured', '-published_date', 'title']
+        ordering = ['building', 'floor', 'order', 'title']
         verbose_name = "Scene Virtual Tour"
         verbose_name_plural = "Scenes Virtual Tour"
+        indexes = [
+            models.Index(fields=['building', 'floor']),
+            models.Index(fields=['is_active', 'is_featured']),
+        ]
     
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -82,15 +109,25 @@ class Scene(models.Model):
         super().save(*args, **kwargs)
     
     def __str__(self):
-        return self.title
+        """Human-readable string with floor info"""
+        floor_str = f"Lt.{self.floor}" if self.floor else "Outdoor"
+        return f"{self.building} - {floor_str} - {self.title}"
+    
+    @property
+    def location_label(self):
+        """Human-readable location string for display"""
+        if self.floor:
+            return f"{self.building}, Lantai {self.floor}"
+        return f"{self.building} (Area Outdoor)"
 
 
 class Hotspot(models.Model):
-    """Model untuk navigasi antar scene dan info point dalam panorama"""
+    """Model untuk navigasi antar scene, info point, dan floor navigation dalam panorama"""
     
     HOTSPOT_TYPE_CHOICES = [
-        ('scene', 'Scene Link'),   # Navigasi ke scene lain
-        ('info', 'Info Point'),    # Popup informasi statis
+        ('scene', 'Scene Navigation'),   # Navigasi ke scene lain
+        ('info', 'Info Point'),          # Popup informasi statis
+        ('floor', 'Floor Navigation'),   # Pindah lantai (NEW)
     ]
     
     # Relations
