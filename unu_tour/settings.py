@@ -210,6 +210,17 @@ CSRF_TRUSTED_ORIGINS = os.getenv(
     'http://localhost:3000,http://127.0.0.1:3000'
 ).split(',')
 
+# DEBUG: Force add common Vercel domains to trusted origins
+CSRF_TRUSTED_ORIGINS.extend([
+    'https://unuyo-tour-frontend.vercel.app',
+    'https://unujogja-tour-backend.vercel.app',
+])
+
+# Remove duplicates
+CSRF_TRUSTED_ORIGINS = list(set(CSRF_TRUSTED_ORIGINS))
+
+print(f"DEBUG: CSRF_TRUSTED_ORIGINS = {CSRF_TRUSTED_ORIGINS}")
+
 CORS_ALLOW_ALL_ORIGINS = os.getenv('CORS_ALLOW_ALL_ORIGINS', 'False') == 'True'
 
 # REST Framework Configuration
