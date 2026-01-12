@@ -3,8 +3,9 @@ import Link from "next/link";
 import { Scene } from "@/types/scene";
 
 async function getScenes(): Promise<Scene[]> {
-    // Try fetching from the backend directly
-    const res = await fetch('http://127.0.0.1:8000/api/scenes/', { cache: 'no-store' });
+    // Use env var for API URL, fallback to localhost for dev
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+    const res = await fetch(`${apiUrl}/api/scenes/`, { cache: 'no-store' });
 
     if (!res.ok) {
         throw new Error('Failed to fetch scenes');

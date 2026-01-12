@@ -25,8 +25,9 @@ const PSViewer = ({ initialData }: PSViewerProps) => {
     // Fetch Scene List on Mount
     useEffect(() => {
         const fetchScenes = async () => {
+            const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
             try {
-                const res = await fetch('http://127.0.0.1:8000/api/scenes/');
+                const res = await fetch(`${baseUrl}/api/scenes/`);
                 if (res.ok) {
                     const data = await res.json();
                     setSceneList(data);
@@ -74,10 +75,16 @@ const PSViewer = ({ initialData }: PSViewerProps) => {
     // Correct URL for Proxy
     const getProxyUrl = (url: string) => {
         if (!url) return '';
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+
+        // Remove backend domain to simply use /media (Next.js Rewrite proxy)
+        if (url.startsWith(baseUrl)) {
+            return url.replace(baseUrl, '');
+        }
+
+        // Fallback for hardcoded localhost in DB
         if (url.includes('http://127.0.0.1:8000/media')) {
             return url.replace('http://127.0.0.1:8000/media', '/media');
-        } else if (url.includes('http://localhost:8000/media')) {
-            return url.replace('http://localhost:8000/media', '/media');
         }
         return url;
     };
@@ -88,8 +95,10 @@ const PSViewer = ({ initialData }: PSViewerProps) => {
         setIsTransitioning(true);
         setLoadError(null);
 
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+
         try {
-            const res = await fetch(`http://127.0.0.1:8000/api/scenes/${slug}/`);
+            const res = await fetch(`${baseUrl}/api/scenes/${slug}/`);
             if (!res.ok) throw new Error("Scene load failed");
             const newSceneData: Scene = await res.json();
 
