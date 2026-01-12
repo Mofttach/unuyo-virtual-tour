@@ -56,6 +56,7 @@ INSTALLED_APPS = [
 # JAZZMIN SETTINGS REMOVED
 
 MIDDLEWARE = [
+    'unu_tour.middleware.DatabaseErrorMiddleware', # Top priority to catch DB errors
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',  # Add WhiteNoise
     'corsheaders.middleware.CorsMiddleware',  # Must be before CommonMiddleware
