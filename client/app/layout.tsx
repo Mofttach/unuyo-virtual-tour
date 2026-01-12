@@ -18,6 +18,11 @@ const poppins = Poppins({
 export const metadata: Metadata = {
   title: "Virtual Tour - UNU Yogyakarta",
   description: "Jelajahi kampus secara virtual dengan teknologi 360°",
+  icons: {
+    icon: "/gold-unu.ico",
+    shortcut: "/gold-unu.png",
+    apple: "/gold-unu.png",
+  },
 };
 
 import Navbar from "@/components/Navbar";

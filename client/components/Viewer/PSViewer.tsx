@@ -40,9 +40,15 @@ const PSViewer = ({ initialData }: PSViewerProps) => {
 
     // Helper: Create Markers Data
     const createMarkers = (scene: Scene) => {
-        if (!scene.hotspots) return [];
+        if (!scene.hotspots || scene.hotspots.length === 0) {
+            console.log("No hotspots for scene:", scene.slug);
+            return [];
+        }
 
-        const arrowSvg = "data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 100 100' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='dropShadow'%3E%3CfeGaussianBlur in='SourceAlpha' stdDeviation='3'/%3E%3CfeOffset dx='1' dy='1' result='offsetblur'/%3E%3CfeFlood flood-color='rgba(0,0,0,0.5)'/%3E%3CfeComposite in2='offsetblur' operator='in'/%3E%3CfeMerge%3E%3CfeMergeNode/%3E%3CfeMergeNode in='SourceGraphic'/%3E%3C/feMerge%3E%3C/filter%3E%3Cpath d='M50 20 L80 60 L50 45 L20 60 Z' fill='url(%23grad1)' stroke='white' stroke-width='3' filter='url(%23dropShadow)'/%3E%3Cdefs%3E%3ClinearGradient id='grad1' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%23d4af37;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%23f9d45e;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3CanimateTransform attributeName='transform' type='translate' values='0 0; 0 -5; 0 0' dur='2s' repeatCount='indefinite' /%3E%3C/svg%3E";
+        console.log("Creating markers for:", scene.slug, scene.hotspots);
+
+        // Solid Color Arrow (Simpler, robust)
+        const arrowSvg = "data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 100 100' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='dropShadow'%3E%3CfeGaussianBlur in='SourceAlpha' stdDeviation='3'/%3E%3CfeOffset dx='1' dy='1' result='offsetblur'/%3E%3CfeFlood flood-color='rgba(0,0,0,0.5)'/%3E%3CfeComposite in2='offsetblur' operator='in'/%3E%3CfeMerge%3E%3CfeMergeNode/%3E%3CfeMergeNode in='SourceGraphic'/%3E%3C/feMerge%3E%3C/filter%3E%3Cpath d='M50 20 L80 60 L50 45 L20 60 Z' fill='%23d4af37' stroke='white' stroke-width='3' filter='url(%23dropShadow)'/%3E%3CanimateTransform attributeName='transform' type='translate' values='0 0; 0 -5; 0 0' dur='2s' repeatCount='indefinite' /%3E%3C/svg%3E";
 
         const infoSvg = "data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' fill='none' xmlns='http://www.w3.org/2000/svg'%3E%3Ccircle cx='30' cy='30' r='18' fill='%23E74C3C' stroke='white' stroke-width='2'/%3E%3Cpath d='M30 24V26M30 28V36' stroke='white' stroke-width='3' stroke-linecap='round'/%3E%3C/svg%3E";
 

@@ -1,0 +1,22 @@
+{
+    "builds": [
+        {
+            "src": "unu_tour/wsgi.py",
+            "use": "@vercel/python"
+        },
+        {
+            "src": "build.sh",
+            "use": "@vercel/static-build"
+        }
+    ],
+    "routes": [
+        {
+            "src": "/static/(.*)",
+            "dest": "/static/$1"
+        },
+        {
+            "src": "/(.*)",
+            "dest": "unu_tour/wsgi.py"
+        }
+    ]
+}
