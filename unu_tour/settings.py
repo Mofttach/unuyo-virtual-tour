@@ -221,6 +221,7 @@ REST_FRAMEWORK = {
     'DEFAULT_THROTTLE_RATES': {
         'anon': os.getenv('API_RATE_LIMIT', '1000/hour'),
     },
+    'EXCEPTION_HANDLER': 'tour_api.exceptions.custom_exception_handler',
 }
 
 # Security Settings (Production)
