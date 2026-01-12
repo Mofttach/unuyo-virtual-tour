@@ -163,8 +163,35 @@ STATICFILES_DIRS = [
 ]
 
 # Media files (User uploaded files)
-MEDIA_URL = os.getenv('MEDIA_URL', '/media/')
-MEDIA_ROOT = BASE_DIR / 'media'
+# Check if Supabase Storage credentials are set
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID')
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY')
+AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME')
+AWS_S3_ENDPOINT_URL = os.getenv('AWS_S3_ENDPOINT_URL')
+
+if AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY and AWS_STORAGE_BUCKET_NAME:
+    STORAGES = {
+        "default": {
+            "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+            "OPTIONS": {
+                "access_key": AWS_ACCESS_KEY_ID,
+                "secret_key": AWS_SECRET_ACCESS_KEY,
+                "bucket_name": AWS_STORAGE_BUCKET_NAME,
+                "endpoint_url": AWS_S3_ENDPOINT_URL,
+                "location": "media",  # Subfolder in bucket
+                "file_overwrite": False,  # Unique filenames
+                "default_acl": "public-read",  # Publicly accessible
+            },
+        },
+        "staticfiles": {
+            "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        },
+    }
+    MEDIA_URL = f"{AWS_S3_ENDPOINT_URL}/storage/v1/object/public/{AWS_STORAGE_BUCKET_NAME}/media/"
+else:
+    # Fallback to local storage (Development)
+    MEDIA_URL = os.getenv('MEDIA_URL', '/media/')
+    MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
