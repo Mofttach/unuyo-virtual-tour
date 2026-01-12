@@ -79,7 +79,7 @@ class SceneAdmin(admin.ModelAdmin):
                 'border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);"/>',
                 obj.thumbnail.url
             )
-        return format_html('<div style="width: 80px; height: 45px; background: #ddd; '
+        return mark_safe('<div style="width: 80px; height: 45px; background: #ddd; '
                           'border-radius: 4px; display: flex; align-items: center; '
                           'justify-content: center; font-size: 10px; color: #999;">No Image</div>')
     thumbnail_preview.short_description = "Preview"
@@ -87,21 +87,21 @@ class SceneAdmin(admin.ModelAdmin):
     def is_featured_badge(self, obj):
         """Visual badge for featured status"""
         if obj.is_featured:
-            return format_html(
+            return mark_safe(
                 '<span style="background: #f39c12; color: white; padding: 3px 8px; '
                 'border-radius: 3px; font-size: 10px; font-weight: 600;">FEATURED</span>'
             )
-        return format_html('<span style="color: #999;">-</span>')
+        return mark_safe('<span style="color: #999;">-</span>')
     is_featured_badge.short_description = "Featured"
     
     def is_active_badge(self, obj):
         """Visual badge for active status"""
         if obj.is_active:
-            return format_html(
+            return mark_safe(
                 '<span style="background: #27ae60; color: white; padding: 3px 8px; '
                 'border-radius: 3px; font-size: 10px; font-weight: 600;">ACTIVE</span>'
             )
-        return format_html(
+        return mark_safe(
             '<span style="background: #e74c3c; color: white; padding: 3px 8px; '
             'border-radius: 3px; font-size: 10px; font-weight: 600;">INACTIVE</span>'
         )
@@ -126,7 +126,7 @@ class SceneAdmin(admin.ModelAdmin):
                 'border-radius: 4px; font-size: 11px; font-weight: 600;">Lt. {}</span>',
                 obj.floor
             )
-        return format_html(
+        return mark_safe(
             '<span style="background: #666; color: white; padding: 4px 10px; '
             'border-radius: 4px; font-size: 11px; font-weight: 600;">Outdoor</span>'
         )
@@ -159,7 +159,7 @@ class SceneAdmin(admin.ModelAdmin):
                 obj.panorama_image.url,
                 obj.thumbnail.url if obj.thumbnail else obj.panorama_image.url
             )
-        return format_html('<p style="color: #999;">Belum ada gambar</p>')
+        return mark_safe('<p style="color: #999;">Belum ada gambar</p>')
     panorama_preview.short_description = "Preview Panorama"
     
     def make_featured(self, request, queryset):
