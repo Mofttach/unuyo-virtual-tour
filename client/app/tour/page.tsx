@@ -12,7 +12,8 @@ export default function TourIndexPage() {
         const fetchFeatured = async () => {
             try {
                 // Fetch featured scene to start the tour
-                const res = await fetch('http://127.0.0.1:8000/api/scenes/featured/');
+                const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+                const res = await fetch(`${apiUrl}/api/scenes/featured/`);
                 if (res.ok) {
                     const data = await res.json();
                     setStartScene(data);
