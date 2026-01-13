@@ -206,6 +206,12 @@ CORS_ALLOWED_ORIGINS = os.getenv(
     'http://localhost:3000,http://127.0.0.1:3000,http://localhost:5500,http://127.0.0.1:5500'
 ).split(',')
 
+# Force add Frontend Vercel domain
+CORS_ALLOWED_ORIGINS.extend([
+    'https://tour-unujogja.vercel.app',
+    'https://tour-unujogja-mofttachs-projects.vercel.app',
+])
+
 CSRF_TRUSTED_ORIGINS = os.getenv(
     'CSRF_TRUSTED_ORIGINS',
     'http://localhost:3000,http://127.0.0.1:3000'
