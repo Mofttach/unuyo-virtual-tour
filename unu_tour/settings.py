@@ -56,7 +56,6 @@ INSTALLED_APPS = [
 # JAZZMIN SETTINGS REMOVED
 
 MIDDLEWARE = [
-    'unu_tour.middleware.RequestLoggingMiddleware', # Debug Logging
     'unu_tour.middleware.DatabaseErrorMiddleware', # Top priority to catch DB errors
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',  # Add WhiteNoise
@@ -213,9 +212,8 @@ CSRF_TRUSTED_ORIGINS = os.getenv(
 
 # DEBUG: Force add common Vercel domains to trusted origins
 CSRF_TRUSTED_ORIGINS.extend([
-    'https://*.vercel.app', 
     'https://unuyo-tour-frontend.vercel.app',
-    'https://tour-unujogja-backend.vercel.app', # Likely the real one based on logs
+    'https://unujogja-tour-backend.vercel.app', # FIXED: Correct domain from logs
 ])
 
 # Remove duplicates
