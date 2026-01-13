@@ -213,8 +213,9 @@ CSRF_TRUSTED_ORIGINS = os.getenv(
 
 # DEBUG: Force add common Vercel domains to trusted origins
 CSRF_TRUSTED_ORIGINS.extend([
-    'https://unuyo-tour-frontend.vercel.app',
-    'https://unujogja-tour-backend.vercel.app', # FIXED: Correct domain from logs
+    'https://tour-unujogja.vercel.app', # CORRECT Frontend URL
+    'https://unujogja-tour-backend.vercel.app', # Backend Production URL
+    'https://.vercel.app', # Wildcard for ALL Vercel preview/branch URLs
 ])
 
 # Remove duplicates
