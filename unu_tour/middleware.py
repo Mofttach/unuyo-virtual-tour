@@ -23,3 +23,19 @@ class DatabaseErrorMiddleware:
                     status=503
                 )
             raise e
+
+class RequestLoggingMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
+        # Log Headers relevant to CSRF
+        print("DEBUG REQUEST HEADERS:")
+        print(f"Scheme: {request.scheme}")
+        print(f"Host: {request.get_host()}")
+        print(f"Referer: {request.META.get('HTTP_REFERER', 'None')}")
+        print(f"Origin: {request.META.get('HTTP_ORIGIN', 'None')}")
+        print(f"X-Forwarded-Proto: {request.META.get('HTTP_X_FORWARDED_PROTO', 'None')}")
+        
+        response = self.get_response(request)
+        return response
