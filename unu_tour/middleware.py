@@ -29,6 +29,26 @@ class RequestLoggingMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
+        from django.conf import settings
+        print("="*30)
+        print("DEBUG REQUEST HEADERS:")
+        print(f"Path: {request.path}")
+        print(f"Scheme: {request.scheme}")
+        print(f"Host: {request.get_host()}")
+        print(f"Referer: {request.META.get('HTTP_REFERER', 'None')}")
+        print(f"Origin: {request.META.get('HTTP_ORIGIN', 'None')}")
+        print(f"X-Forwarded-Proto: {request.META.get('HTTP_X_FORWARDED_PROTO', 'None')}")
+        print(f"CSRF_TRUSTED_ORIGINS (Active): {settings.CSRF_TRUSTED_ORIGINS}")
+        print("="*30)
+        
+        response = self.get_response(request)
+        return response
+
+class RequestLoggingMiddleware:
+    def __init__(self, get_response):
+        self.get_response = get_response
+
+    def __call__(self, request):
         # Log Headers relevant to CSRF
         print("DEBUG REQUEST HEADERS:")
         print(f"Scheme: {request.scheme}")

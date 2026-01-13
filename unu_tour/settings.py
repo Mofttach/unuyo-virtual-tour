@@ -56,6 +56,7 @@ INSTALLED_APPS = [
 # JAZZMIN SETTINGS REMOVED
 
 MIDDLEWARE = [
+    'unu_tour.middleware.RequestLoggingMiddleware',
     'unu_tour.middleware.DatabaseErrorMiddleware', # Top priority to catch DB errors
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',  # Add WhiteNoise
@@ -241,12 +242,12 @@ REST_FRAMEWORK = {
 }
 
 # Security Settings (Production)
-SECURE_SSL_REDIRECT = os.getenv('SECURE_SSL_REDIRECT', 'False') == 'True'
-SESSION_COOKIE_SECURE = os.getenv('SESSION_COOKIE_SECURE', 'False') == 'True'
-CSRF_COOKIE_SECURE = os.getenv('CSRF_COOKIE_SECURE', 'False') == 'True'
-SECURE_HSTS_SECONDS = int(os.getenv('SECURE_HSTS_SECONDS', '0'))
-SECURE_HSTS_INCLUDE_SUBDOMAINS = os.getenv('SECURE_HSTS_INCLUDE_SUBDOMAINS', 'False') == 'True'
-SECURE_HSTS_PRELOAD = os.getenv('SECURE_HSTS_PRELOAD', 'False') == 'True'
+SECURE_SSL_REDIRECT = True # Vercel is always HTTPS
+SESSION_COOKIE_SECURE = True # Always True in Vercel
+CSRF_COOKIE_SECURE = True # Always True in Vercel
+SECURE_HSTS_SECONDS = int(os.getenv('SECURE_HSTS_SECONDS', '31536000'))
+SECURE_HSTS_INCLUDE_SUBDOMAINS = True
+SECURE_HSTS_PRELOAD = True
 
 # Vercel/Proxy Configuration (CRITICAL for CSRF)
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
