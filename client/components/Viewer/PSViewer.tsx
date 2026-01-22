@@ -22,6 +22,7 @@ const PSViewer = ({ initialData }: PSViewerProps) => {
     const [isTransitioning, setIsTransitioning] = useState(false);
     const [loadError, setLoadError] = useState<string | null>(null);
     const [showInfo, setShowInfo] = useState(false);
+    const [infoModal, setInfoModal] = useState<{ title: string; description: string } | null>(null);
 
     // Fetch Scene List on Mount
     useEffect(() => {
@@ -56,7 +57,7 @@ const PSViewer = ({ initialData }: PSViewerProps) => {
 
         return (scene.hotspots || []).map(h => ({
             id: `hotspot-${h.id}`,
-            position: { yaw: h.yaw, pitch: h.pitch },
+            position: { yaw: h.yaw * (Math.PI / 180), pitch: h.pitch * (Math.PI / 180) },
             image: h.hotspot_type === 'scene' ? arrowSvg : infoSvg,
             size: { width: h.hotspot_type === 'scene' ? 80 : 50, height: h.hotspot_type === 'scene' ? 80 : 50 },
             anchor: 'bottom center',
@@ -68,6 +69,7 @@ const PSViewer = ({ initialData }: PSViewerProps) => {
             data: {
                 type: h.hotspot_type,
                 targetSlug: h.to_scene_slug,
+                text: h.text,
                 description: h.info_description
             }
         }));
@@ -208,10 +210,16 @@ const PSViewer = ({ initialData }: PSViewerProps) => {
             const { marker } = e;
             const data = marker.data as any;
 
+            console.log("Marker clicked:", marker.id, data);
+
             if (data.type === 'scene' && data.targetSlug) {
+                console.log("Navigating to:", data.targetSlug);
                 loadScene(data.targetSlug);
             } else if (data.type === 'info') {
-                alert(data.description || marker.config.tooltip?.content);
+                setInfoModal({
+                    title: data.text || 'Informasi',
+                    description: data.description || 'Tidak ada deskripsi.'
+                });
             }
         });
 
@@ -228,7 +236,7 @@ const PSViewer = ({ initialData }: PSViewerProps) => {
     sceneList.forEach(scene => {
         const building = scene.building || 'Lainnya';
         const floor = scene.floor ? `Lantai ${scene.floor}` : 'Area Outdoor';
-        
+
         if (!scenesByBuildingFloor[building]) {
             scenesByBuildingFloor[building] = {};
         }
@@ -279,7 +287,7 @@ const PSViewer = ({ initialData }: PSViewerProps) => {
                         >
                             <span className="text-base md:text-lg">✕</span>
                         </button>
-                        
+
                         <button
                             onClick={() => viewerInstance.current?.zoom(10)}
                             className="w-9 h-9 md:w-10 md:h-10 bg-black/70 backdrop-blur-md hover:bg-black/90 text-white rounded-lg flex items-center justify-center transition-all duration-300 border border-white/20 shadow-lg hover:scale-110 active:scale-95"
@@ -287,7 +295,7 @@ const PSViewer = ({ initialData }: PSViewerProps) => {
                         >
                             <span className="text-base md:text-lg font-bold">+</span>
                         </button>
-                        
+
                         <button
                             onClick={() => viewerInstance.current?.zoom(-10)}
                             className="w-9 h-9 md:w-10 md:h-10 bg-black/70 backdrop-blur-md hover:bg-black/90 text-white rounded-lg flex items-center justify-center transition-all duration-300 border border-white/20 shadow-lg hover:scale-110 active:scale-95"
@@ -295,7 +303,7 @@ const PSViewer = ({ initialData }: PSViewerProps) => {
                         >
                             <span className="text-base md:text-lg font-bold">−</span>
                         </button>
-                        
+
                         <button
                             onClick={() => {
                                 const elem = viewerRef.current?.parentElement;
@@ -312,14 +320,13 @@ const PSViewer = ({ initialData }: PSViewerProps) => {
                         >
                             <span className="text-sm md:text-base">⛶</span>
                         </button>
-                        
+
                         <button
                             onClick={() => setShowInfo(!showInfo)}
-                            className={`w-9 h-9 md:w-10 md:h-10 backdrop-blur-md text-white rounded-lg flex items-center justify-center transition-all duration-300 border shadow-lg hover:scale-110 active:scale-95 ${
-                                showInfo 
-                                    ? 'bg-unu-gold/90 border-unu-gold text-black' 
-                                    : 'bg-black/70 hover:bg-black/90 border-white/20'
-                            }`}
+                            className={`w-9 h-9 md:w-10 md:h-10 backdrop-blur-md text-white rounded-lg flex items-center justify-center transition-all duration-300 border shadow-lg hover:scale-110 active:scale-95 ${showInfo
+                                ? 'bg-unu-gold/90 border-unu-gold text-black'
+                                : 'bg-black/70 hover:bg-black/90 border-white/20'
+                                }`}
                             title="Informasi"
                         >
                             <span className="text-sm md:text-base font-bold">i</span>
@@ -392,7 +399,7 @@ const PSViewer = ({ initialData }: PSViewerProps) => {
                                                 {building}
                                             </h3>
                                         </div>
-                                        
+
                                         <div className="p-1.5 md:p-2 space-y-2 md:space-y-3">
                                             {Object.keys(scenesByBuildingFloor[building])
                                                 .sort((a, b) => {
@@ -402,55 +409,95 @@ const PSViewer = ({ initialData }: PSViewerProps) => {
                                                     return floorA - floorB;
                                                 })
                                                 .map((floor) => (
-                                                <div key={floor} className="space-y-1">
-                                                    <div className="px-2 py-1">
-                                                        <p className="text-[10px] md:text-xs font-semibold text-gray-400 uppercase tracking-wide">{floor}</p>
-                                                    </div>
-                                                    {scenesByBuildingFloor[building][floor].map((scene) => (
-                                                        <button
-                                                            key={scene.id}
-                                                            onClick={() => loadScene(scene.slug)}
-                                                            className={`w-full flex items-center gap-2 md:gap-3 p-2 md:p-2.5 rounded-lg transition-all duration-300 group ${
-                                                                scene.slug === currentScene.slug
+                                                    <div key={floor} className="space-y-1">
+                                                        <div className="px-2 py-1">
+                                                            <p className="text-[10px] md:text-xs font-semibold text-gray-400 uppercase tracking-wide">{floor}</p>
+                                                        </div>
+                                                        {scenesByBuildingFloor[building][floor].map((scene) => (
+                                                            <button
+                                                                key={scene.id}
+                                                                onClick={() => loadScene(scene.slug)}
+                                                                className={`w-full flex items-center gap-2 md:gap-3 p-2 md:p-2.5 rounded-lg transition-all duration-300 group ${scene.slug === currentScene.slug
                                                                     ? 'bg-gradient-to-r from-unu-gold/20 to-unu-gold/10 border border-unu-gold/50 shadow-lg shadow-unu-gold/20'
                                                                     : 'hover:bg-white/5 border border-transparent hover:border-white/10 hover:translate-x-1'
-                                                            }`}
-                                                        >
-                                                            <div className="relative w-12 h-12 md:w-14 md:h-14 rounded-lg overflow-hidden bg-black shrink-0 ring-1 ring-white/10">
-                                                                {scene.thumbnail ? (
-                                                                    <img
-                                                                        src={scene.thumbnail}
-                                                                        alt={scene.title}
-                                                                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                                                                    />
-                                                                ) : (
-                                                                    <div className="w-full h-full flex items-center justify-center text-xs text-gray-600">
-                                                                        <span className="text-xl md:text-2xl">🏛️</span>
+                                                                    }`}
+                                                            >
+                                                                <div className="relative w-12 h-12 md:w-14 md:h-14 rounded-lg overflow-hidden bg-black shrink-0 ring-1 ring-white/10">
+                                                                    {scene.thumbnail ? (
+                                                                        <img
+                                                                            src={scene.thumbnail}
+                                                                            alt={scene.title}
+                                                                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                                                        />
+                                                                    ) : (
+                                                                        <div className="w-full h-full flex items-center justify-center text-xs text-gray-600">
+                                                                            <span className="text-xl md:text-2xl">🏛️</span>
+                                                                        </div>
+                                                                    )}
+                                                                </div>
+
+                                                                <div className="flex-1 text-left min-w-0">
+                                                                    <div className={`font-semibold text-xs md:text-sm transition-colors duration-300 truncate ${scene.slug === currentScene.slug ? 'text-unu-gold' : 'text-white group-hover:text-unu-gold'
+                                                                        }`}>
+                                                                        {scene.title}
+                                                                    </div>
+                                                                </div>
+
+                                                                {scene.slug === currentScene.slug && (
+                                                                    <div className="ml-auto shrink-0">
+                                                                        <div className="w-2 h-2 rounded-full bg-unu-gold shadow-[0_0_10px_#d4af37] animate-pulse"></div>
                                                                     </div>
                                                                 )}
-                                                            </div>
-
-                                                            <div className="flex-1 text-left min-w-0">
-                                                                <div className={`font-semibold text-xs md:text-sm transition-colors duration-300 truncate ${
-                                                                    scene.slug === currentScene.slug ? 'text-unu-gold' : 'text-white group-hover:text-unu-gold'
-                                                                }`}>
-                                                                    {scene.title}
-                                                                </div>
-                                                            </div>
-
-                                                            {scene.slug === currentScene.slug && (
-                                                                <div className="ml-auto shrink-0">
-                                                                    <div className="w-2 h-2 rounded-full bg-unu-gold shadow-[0_0_10px_#d4af37] animate-pulse"></div>
-                                                                </div>
-                                                            )}
-                                                        </button>
-                                                    ))}
-                                                </div>
-                                            ))}
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                ))}
                                         </div>
                                     </div>
                                 ))
                             )}
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Info Point Modal */}
+            {infoModal && (
+                <div className="fixed inset-0 z-[60] flex items-center justify-center p-4">
+                    <div
+                        className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+                        onClick={() => setInfoModal(null)}
+                    ></div>
+                    <div className="relative bg-gradient-to-b from-zinc-900 to-black rounded-2xl shadow-2xl border border-unu-gold/30 max-w-md w-full animate-in zoom-in-95 fade-in duration-300">
+                        {/* Header */}
+                        <div className="bg-gradient-to-r from-unu-gold to-yellow-600 px-6 py-4 rounded-t-2xl flex items-center justify-between">
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                                    <span className="text-xl">ℹ️</span>
+                                </div>
+                                <h3 className="font-bold text-black text-lg">{infoModal.title}</h3>
+                            </div>
+                            <button
+                                onClick={() => setInfoModal(null)}
+                                className="w-8 h-8 rounded-full bg-black/20 hover:bg-black/40 flex items-center justify-center text-black transition-all duration-300 hover:rotate-90"
+                            >
+                                ✕
+                            </button>
+                        </div>
+                        {/* Body */}
+                        <div className="p-6">
+                            <p className="text-gray-300 leading-relaxed whitespace-pre-line">
+                                {infoModal.description}
+                            </p>
+                        </div>
+                        {/* Footer */}
+                        <div className="px-6 pb-6">
+                            <button
+                                onClick={() => setInfoModal(null)}
+                                className="w-full py-3 bg-unu-gold/20 hover:bg-unu-gold/30 text-unu-gold font-semibold rounded-lg transition-all duration-300 border border-unu-gold/30"
+                            >
+                                Tutup
+                            </button>
                         </div>
                     </div>
                 </div>

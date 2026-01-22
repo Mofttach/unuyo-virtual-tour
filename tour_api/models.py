@@ -14,6 +14,7 @@ class Scene(models.Model):
     
     # Content
     description = models.TextField(
+        blank=True,
         help_text="Deskripsi lengkap dan menarik tentang lokasi ini"
     )
     
