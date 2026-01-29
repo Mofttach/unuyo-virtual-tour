@@ -117,8 +117,8 @@ database_url = os.getenv('DATABASE_URL')
 if database_url and not USE_LOCAL_DB:
     DATABASES['default'] = dj_database_url.parse(
         database_url,
-        conn_max_age=600,
-        conn_health_checks=True,
+        conn_max_age=0, # Disable persistent connections for stability with Supabase Pooler
+        conn_health_checks=False,
     )
     print(f"[DB] Using Supabase PostgreSQL")
 else:
@@ -178,6 +178,15 @@ AWS_S3_ENDPOINT_URL = os.getenv('AWS_S3_ENDPOINT_URL', '').strip()
 
 # Use S3 storage ONLY if USE_LOCAL_DB is False AND credentials exist
 if not USE_LOCAL_DB and AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY and AWS_STORAGE_BUCKET_NAME and AWS_S3_ENDPOINT_URL:
+    # Parse project ID from S3 endpoint for constructing public URL
+    # Endpoint format: https://<project_id>.storage.supabase.co
+    try:
+        project_id = AWS_S3_ENDPOINT_URL.split('//')[1].split('.')[0]
+        supabase_public_domain = f"{project_id}.supabase.co/storage/v1/object/public/{AWS_STORAGE_BUCKET_NAME}"
+    except Exception:
+        # Fallback if URL parsing fails (shouldn't happen with valid Supabase format)
+        supabase_public_domain = None
+
     STORAGES = {
         "default": {
             "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
@@ -186,18 +195,25 @@ if not USE_LOCAL_DB and AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY and AWS_STOR
                 "secret_key": AWS_SECRET_ACCESS_KEY,
                 "bucket_name": AWS_STORAGE_BUCKET_NAME,
                 "endpoint_url": AWS_S3_ENDPOINT_URL,
-                "location": "media",  # Subfolder in bucket
-                "file_overwrite": False,  # Unique filenames
-                "default_acl": "public-read",  # Publicly accessible
-                "querystring_auth": False,  # Disable presigned URLs (public bucket)
+                # "location": "media",  # REMOVED: Don't nest media/media
+                "file_overwrite": False,
+                "default_acl": "public-read", 
+                "querystring_auth": False,
+                "custom_domain": supabase_public_domain, # Use calculated public domain
             },
         },
         "staticfiles": {
             "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
         },
     }
-    MEDIA_URL = f"{AWS_S3_ENDPOINT_URL}/storage/v1/object/public/{AWS_STORAGE_BUCKET_NAME}/media/"
-    print(f"[STORAGE] Using Supabase S3 Storage")
+    
+    # Update MEDIA_URL to match custom_domain + location logic checking
+    if supabase_public_domain:
+         MEDIA_URL = f"https://{supabase_public_domain}/"
+    else:
+         MEDIA_URL = f"{AWS_S3_ENDPOINT_URL}/storage/v1/object/public/{AWS_STORAGE_BUCKET_NAME}/"
+
+    print(f"[STORAGE] Using Supabase S3 Storage. Public URL: {MEDIA_URL}")
 else:
     # Fallback to local storage (Development)
     MEDIA_URL = os.getenv('MEDIA_URL', '/media/')
@@ -231,6 +247,8 @@ CSRF_TRUSTED_ORIGINS.extend([
     'https://tour-unujogja.vercel.app', # CORRECT Frontend URL
     'https://unujogja-tour-backend.vercel.app', # Backend Production URL
     'https://.vercel.app', # Wildcard for ALL Vercel preview/branch URLs
+    'http://127.0.0.1:8000', # Local Backend
+    'http://localhost:8000', # Local Backend
 ])
 
 # Remove duplicates
