@@ -23,6 +23,18 @@ const PSViewer = ({ initialData }: PSViewerProps) => {
     const [loadError, setLoadError] = useState<string | null>(null);
     const [showInfo, setShowInfo] = useState(false);
     const [infoModal, setInfoModal] = useState<{ title: string; description: string } | null>(null);
+    const [mobilePreview, setMobilePreview] = useState<{
+        markerId: string;
+        text: string;
+        targetSlug: string | null;
+        type: 'scene' | 'info' | 'floor';
+        description?: string;
+    } | null>(null);
+
+    // Helper: Detect touch device
+    const isTouchDevice = () => {
+        return typeof window !== 'undefined' && ('ontouchstart' in window || navigator.maxTouchPoints > 0);
+    };
 
     // Fetch Scene List on Mount
     useEffect(() => {
@@ -212,15 +224,40 @@ const PSViewer = ({ initialData }: PSViewerProps) => {
 
             console.log("Marker clicked:", marker.id, data);
 
-            if (data.type === 'scene' && data.targetSlug) {
-                console.log("Navigating to:", data.targetSlug);
-                loadScene(data.targetSlug);
-            } else if (data.type === 'info') {
-                setInfoModal({
-                    title: data.text || 'Informasi',
-                    description: data.description || 'Tidak ada deskripsi.'
-                });
+            if (isTouchDevice()) {
+                // MOBILE: Show preview first for scene/floor navigation
+                if ((data.type === 'scene' || data.type === 'floor') && data.targetSlug) {
+                    setMobilePreview({
+                        markerId: marker.id,
+                        text: data.text,
+                        targetSlug: data.targetSlug,
+                        type: data.type,
+                        description: data.description
+                    });
+                } else if (data.type === 'info') {
+                    // Info points still show modal immediately
+                    setInfoModal({
+                        title: data.text || 'Informasi',
+                        description: data.description || 'Tidak ada deskripsi.'
+                    });
+                }
+            } else {
+                // DESKTOP: Navigate immediately (existing behavior)
+                if (data.type === 'scene' && data.targetSlug) {
+                    console.log("Navigating to:", data.targetSlug);
+                    loadScene(data.targetSlug);
+                } else if (data.type === 'info') {
+                    setInfoModal({
+                        title: data.text || 'Informasi',
+                        description: data.description || 'Tidak ada deskripsi.'
+                    });
+                }
             }
+        });
+
+        // Auto-dismiss mobile preview when user moves panorama
+        viewer.addEventListener('position-updated', () => {
+            setMobilePreview(null);
         });
 
         viewerInstance.current = viewer;
@@ -499,6 +536,47 @@ const PSViewer = ({ initialData }: PSViewerProps) => {
                                 Tutup
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Mobile Preview Card - Ultra Minimalist */}
+            {mobilePreview && (
+                <div className="fixed bottom-4 left-4 right-4 z-[70] animate-in slide-in-from-bottom duration-200">
+                    <div
+                        className="fixed inset-0 -z-10"
+                        onClick={() => setMobilePreview(null)}
+                    ></div>
+
+                    <div className="bg-black/90 backdrop-blur-sm rounded-full px-2 py-2 flex items-center gap-2 max-w-sm mx-auto border border-white/10">
+                        {/* Hotspot Icon */}
+                        <div className="w-8 h-8 rounded-full bg-unu-gold/20 flex items-center justify-center shrink-0">
+                            <span className="text-unu-gold text-sm">▲</span>
+                        </div>
+
+                        {/* Text */}
+                        <span className="text-white text-sm font-medium truncate flex-1">{mobilePreview.text}</span>
+
+                        {/* Go Button */}
+                        <button
+                            onClick={() => {
+                                if (mobilePreview.targetSlug) {
+                                    loadScene(mobilePreview.targetSlug);
+                                }
+                                setMobilePreview(null);
+                            }}
+                            className="bg-unu-gold text-black text-sm font-bold px-4 py-1.5 rounded-full shrink-0 active:scale-95 transition-transform"
+                        >
+                            Pergi
+                        </button>
+
+                        {/* Close Button */}
+                        <button
+                            onClick={() => setMobilePreview(null)}
+                            className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center shrink-0 active:scale-95 transition-transform"
+                        >
+                            <span className="text-gray-400 text-xs">✕</span>
+                        </button>
                     </div>
                 </div>
             )}

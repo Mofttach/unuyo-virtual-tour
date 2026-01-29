@@ -4,7 +4,49 @@
 {% block extrastyle %}
 {{ block.super }}
 <link rel="stylesheet" href="{% static 'admin/css/custom-admin.css' %}">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css"/>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/pannellum@2.5.6/build/pannellum.css" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<style>
+    .back-navigation {
+        margin-bottom: 1.5rem;
+        padding-bottom: 1rem;
+        border-bottom: 1px solid #e5e7eb;
+    }
+
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 20px;
+        background: #f3f4f6;
+        color: #374151;
+        border-radius: 8px;
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 14px;
+        transition: all 0.2s;
+        border: 1px solid #e5e7eb;
+    }
+
+    .back-btn:hover {
+        background: #e5e7eb;
+        color: #1f2937;
+    }
+
+    .back-btn i {
+        font-size: 12px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="back-navigation">
+    <a href="{% url 'admin:tour_api_scene_changelist' %}" class="back-btn">
+        <i class="fas fa-arrow-left"></i>
+        Kembali ke Daftar Scene
+    </a>
+</div>
+{{ block.super }}
 {% endblock %}
 
 {% block after_field_sets %}
@@ -14,10 +56,10 @@
 <div class="module visual-editor-section">
     <h2>Visual Hotspot Editor</h2>
     <p class="help">Klik pada panorama untuk menambahkan hotspot. Koordinat akan tersimpan otomatis.</p>
-    
+
     <div class="visual-editor-container">
         <div id="panorama-viewer" style="width: 100%; height: 500px; border-radius: 8px; overflow: hidden;"></div>
-        
+
         <div class="hotspot-controls">
             <div class="control-group">
                 <label for="hotspot-type">Tipe:</label>
@@ -26,7 +68,7 @@
                     <option value="info">Info Point</option>
                 </select>
             </div>
-            
+
             <div class="control-group" id="to-scene-group">
                 <label for="to-scene">Tujuan:</label>
                 <select id="to-scene">
@@ -36,20 +78,20 @@
                     {% endfor %}
                 </select>
             </div>
-            
+
             <div class="control-group">
                 <label for="hotspot-text">Label:</label>
                 <input type="text" id="hotspot-text" placeholder="Contoh: Ke Perpustakaan">
             </div>
-            
+
             <div class="control-group" id="info-desc-group" style="display: none;">
                 <label for="hotspot-info">Deskripsi:</label>
                 <textarea id="hotspot-info" rows="2" placeholder="Deskripsi info point"></textarea>
             </div>
-            
+
             <button type="button" id="add-hotspot-btn" class="button">Tambah Hotspot</button>
         </div>
-        
+
         <div class="hotspot-list">
             <h3>Daftar Hotspot</h3>
             <table class="hotspot-table">
@@ -72,13 +114,16 @@
                         <td>{{ hotspot.text }}</td>
                         <td>{{ hotspot.to_scene.title|default:"-" }}</td>
                         <td>
-                            <button type="button" class="button small goto-hotspot" data-pitch="{{ hotspot.pitch }}" data-yaw="{{ hotspot.yaw }}">Lihat</button>
-                            <button type="button" class="button small delete-hotspot" data-id="{{ hotspot.id }}">Hapus</button>
+                            <button type="button" class="button small goto-hotspot" data-pitch="{{ hotspot.pitch }}"
+                                data-yaw="{{ hotspot.yaw }}">Lihat</button>
+                            <button type="button" class="button small delete-hotspot"
+                                data-id="{{ hotspot.id }}">Hapus</button>
                         </td>
                     </tr>
                     {% empty %}
                     <tr>
-                        <td colspan="4" style="text-align: center; color: #999;">Belum ada hotspot. Klik pada panorama untuk menambahkan.</td>
+                        <td colspan="4" style="text-align: center; color: #999;">Belum ada hotspot. Klik pada panorama
+                            untuk menambahkan.</td>
                     </tr>
                     {% endfor %}
                 </tbody>

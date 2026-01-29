@@ -4,6 +4,8 @@
 {% block title %}{{ title }} | Virtual Tour Admin{% endblock %}
 
 {% block extrahead %}
+<!-- Custom Admin CSS -->
+<link rel="stylesheet" href="{% static 'admin/css/custom-admin.css' %}">
 <!-- Tailwind CSS (Development Mode) -->
 <script src="https://cdn.tailwindcss.com"></script>
 <script>
@@ -23,6 +25,19 @@
         }
     }
 </script>
+<!-- Force Light Theme -->
+<script>
+    // Force light theme immediately
+    document.documentElement.removeAttribute('data-theme');
+    document.documentElement.setAttribute('data-theme', 'light');
+    localStorage.setItem('theme', 'light');
+
+    // Override theme toggle function if exists
+    window.addEventListener('DOMContentLoaded', function () {
+        document.documentElement.setAttribute('data-theme', 'light');
+        document.body.classList.remove('dark');
+    });
+</script>
 <!-- Google Fonts -->
 <link
     href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@400;500;600;700&display=swap"
@@ -31,9 +46,35 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
 <style>
+    /* Force Light Theme */
+    :root {
+        color-scheme: light only !important;
+    }
+
+    html[data-theme="dark"],
+    body.dark {
+        /* Override any dark mode styles */
+        --primary: #417690 !important;
+        --secondary: #79aec8 !important;
+        --body-bg: #f3f4f6 !important;
+        --darkened-bg: #e5e7eb !important;
+    }
+
+    /* Hide dark mode toggle button */
+    #toggle-nav-sidebar,
+    button[title*="theme"],
+    button[aria-label*="theme"],
+    .theme-toggle,
+    #header button[title],
+    #user-tools button.theme-toggle,
+    a[href="#toggle-theme"] {
+        display: none !important;
+    }
+
     body {
         font-family: 'Inter', sans-serif;
-        background-color: #f3f4f6;
+        background-color: #f3f4f6 !important;
+        color-scheme: light !important;
     }
 
     /* Hide Default Sidebar and Breadcrumbs if not needed */
@@ -55,6 +96,13 @@
     #user-tools {
         color: white;
         opacity: 0.9;
+    }
+
+    /* Hide the theme toggle icon/buttons */
+    #user-tools .theme-toggle,
+    .base-svgs,
+    button.theme-toggle {
+        display: none !important;
     }
 
     /* Smooth transitions */

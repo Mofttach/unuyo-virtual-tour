@@ -5,9 +5,33 @@
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
 
     <!-- Header Section -->
-    <div class="mb-10 text-center">
+    <div class="mb-8 text-center">
         <h2 class="text-3xl font-bold text-gray-900 font-display mb-2">Kelola Konten Virtual Tour</h2>
         <p class="text-gray-500">Pilih gedung untuk mulai mengelola scene dan navigasi</p>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
+        <div
+            class="bg-gradient-to-br from-unu-blue to-blue-900 text-white rounded-xl p-5 text-center shadow-lg transform hover:scale-105 transition-transform">
+            <span class="text-3xl font-bold block">{{ stats.total_scenes|default:"0" }}</span>
+            <span class="text-blue-200 text-sm uppercase tracking-wide">Total Scenes</span>
+        </div>
+        <div
+            class="bg-gradient-to-br from-emerald-600 to-emerald-800 text-white rounded-xl p-5 text-center shadow-lg transform hover:scale-105 transition-transform">
+            <span class="text-3xl font-bold block">{{ stats.active_scenes|default:"0" }}</span>
+            <span class="text-emerald-200 text-sm uppercase tracking-wide">Active</span>
+        </div>
+        <div
+            class="bg-gradient-to-br from-amber-500 to-amber-700 text-white rounded-xl p-5 text-center shadow-lg transform hover:scale-105 transition-transform">
+            <span class="text-3xl font-bold block">{{ stats.total_hotspots|default:"0" }}</span>
+            <span class="text-amber-100 text-sm uppercase tracking-wide">Hotspots</span>
+        </div>
+        <div
+            class="bg-gradient-to-br from-purple-600 to-purple-800 text-white rounded-xl p-5 text-center shadow-lg transform hover:scale-105 transition-transform">
+            <span class="text-3xl font-bold block">{{ stats.buildings|default:"0" }}</span>
+            <span class="text-purple-200 text-sm uppercase tracking-wide">Gedung</span>
+        </div>
     </div>
 
     <!-- Building Cards Grid -->

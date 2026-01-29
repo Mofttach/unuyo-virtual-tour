@@ -97,10 +97,12 @@ WSGI_APPLICATION = 'unu_tour.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# Database
-# https://docs.djangoproject.com/en/5.2/ref/settings/#databases
-
-DB_ENGINE = os.getenv('DB_ENGINE', 'sqlite')
+# ============================================
+# USE_LOCAL_DB SWITCHER
+# True = SQLite + Local /media folder
+# False = Supabase PostgreSQL + S3 Storage
+# ============================================
+USE_LOCAL_DB = os.getenv('USE_LOCAL_DB', 'False') == 'True'
 
 # Default to SQLite locally
 DATABASES = {
@@ -110,14 +112,17 @@ DATABASES = {
     }
 }
 
-# Override with DATABASE_URL if present (e.g., from Supabase/Render)
+# Override with DATABASE_URL if present AND USE_LOCAL_DB is False
 database_url = os.getenv('DATABASE_URL')
-if database_url:
+if database_url and not USE_LOCAL_DB:
     DATABASES['default'] = dj_database_url.parse(
         database_url,
         conn_max_age=600,
         conn_health_checks=True,
     )
+    print(f"[DB] Using Supabase PostgreSQL")
+else:
+    print(f"[DB] Using Local SQLite: {BASE_DIR / 'db.sqlite3'}")
 
 
 # Password validation
@@ -171,8 +176,8 @@ AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY', '').strip()
 AWS_STORAGE_BUCKET_NAME = os.getenv('AWS_STORAGE_BUCKET_NAME', '').strip()
 AWS_S3_ENDPOINT_URL = os.getenv('AWS_S3_ENDPOINT_URL', '').strip()
 
-# Only use S3 storage if ALL credentials are present and non-empty AND in production
-if not DEBUG and AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY and AWS_STORAGE_BUCKET_NAME and AWS_S3_ENDPOINT_URL:
+# Use S3 storage ONLY if USE_LOCAL_DB is False AND credentials exist
+if not USE_LOCAL_DB and AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY and AWS_STORAGE_BUCKET_NAME and AWS_S3_ENDPOINT_URL:
     STORAGES = {
         "default": {
             "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
@@ -184,6 +189,7 @@ if not DEBUG and AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY and AWS_STORAGE_BUC
                 "location": "media",  # Subfolder in bucket
                 "file_overwrite": False,  # Unique filenames
                 "default_acl": "public-read",  # Publicly accessible
+                "querystring_auth": False,  # Disable presigned URLs (public bucket)
             },
         },
         "staticfiles": {
@@ -191,10 +197,12 @@ if not DEBUG and AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY and AWS_STORAGE_BUC
         },
     }
     MEDIA_URL = f"{AWS_S3_ENDPOINT_URL}/storage/v1/object/public/{AWS_STORAGE_BUCKET_NAME}/media/"
+    print(f"[STORAGE] Using Supabase S3 Storage")
 else:
     # Fallback to local storage (Development)
     MEDIA_URL = os.getenv('MEDIA_URL', '/media/')
     MEDIA_ROOT = BASE_DIR / 'media'
+    print(f"[STORAGE] Using Local Media: {BASE_DIR / 'media'}")
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field

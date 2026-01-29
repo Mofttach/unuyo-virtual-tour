@@ -3,6 +3,7 @@ from django.utils.html import format_html
 from django.urls import reverse
 from django.utils.safestring import mark_safe
 from .models import Scene, Hotspot
+from .admin_site import admin_site
 
 
 class HotspotInline(admin.StackedInline):
@@ -18,20 +19,20 @@ class HotspotInline(admin.StackedInline):
     verbose_name_plural = "Hotspot Manual - Lebih mudah gunakan Visual Editor di bawah"
 
 
-@admin.register(Scene)
+@admin.register(Scene, site=admin_site)
 class SceneAdmin(admin.ModelAdmin):
-    change_form_template = 'admin/tour_api/scene_change_form.html'
+    change_form_template = 'admin/tour_api/scene/change_form.html'
+    change_list_template = 'admin/tour_api/scene/change_list.html'
     list_display = (
         'thumbnail_preview',
         'title', 
         'building',
         'floor_badge',
         'location', 
-        'published_date', 
         'is_featured_badge',
         'is_active_badge',
         'hotspot_count',
-        'created_at'
+        'preview_link',
     )
     list_filter = (
         'is_active',
@@ -180,10 +181,22 @@ class SceneAdmin(admin.ModelAdmin):
         count = queryset.update(is_active=False)
         self.message_user(request, f"{count} scene dinonaktifkan")
     make_inactive.short_description = "Nonaktifkan scene"
+    
+    def preview_link(self, obj):
+        """Link to preview scene in frontend"""
+        return format_html(
+            '<a href="/tour/?start={}" target="_blank" '
+            'style="background: #3498db; color: white; padding: 4px 12px; '
+            'border-radius: 4px; font-size: 11px; text-decoration: none; '
+            'display: inline-flex; align-items: center; gap: 4px;">'
+            '👁 Preview</a>',
+            obj.slug
+        )
+    preview_link.short_description = "Preview"
 
 
 
-@admin.register(Hotspot)
+@admin.register(Hotspot, site=admin_site)
 class HotspotAdmin(admin.ModelAdmin):
     change_form_template = 'admin/tour_api/hotspot/change_form.html'
     list_display = (
@@ -211,9 +224,3 @@ class HotspotAdmin(admin.ModelAdmin):
             'description': 'Pitch: -90 (bawah) to 90 (atas). Yaw: -180 to 180 (0=depan)'
         }),
     )
-
-
-# Customize Admin Site Header
-admin.site.site_header = "Virtual Tour UNU Yogyakarta"
-admin.site.site_title = "Admin Virtual Tour"
-admin.site.index_title = "Kelola Virtual Tour Kampus"
