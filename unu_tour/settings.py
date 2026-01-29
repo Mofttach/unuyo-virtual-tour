@@ -195,7 +195,7 @@ if not USE_LOCAL_DB and AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY and AWS_STOR
                 "secret_key": AWS_SECRET_ACCESS_KEY,
                 "bucket_name": AWS_STORAGE_BUCKET_NAME,
                 "endpoint_url": AWS_S3_ENDPOINT_URL,
-                # "location": "media",  # REMOVED: Don't nest media/media
+                "location": "media",  # REMOVED: Don't nest media/media
                 "file_overwrite": False,
                 "default_acl": "public-read", 
                 "querystring_auth": False,
