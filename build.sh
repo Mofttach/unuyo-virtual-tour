@@ -1,5 +1,6 @@
 #!/bin/bash
-pip install -r requirements.txt
+# Install dependencies with flag to allow installation in managed environment
+pip install -r requirements.txt --break-system-packages
 python manage.py collectstatic --noinput
 python manage.py migrate
 # Safely seed initial data (only runs if DB is empty)
