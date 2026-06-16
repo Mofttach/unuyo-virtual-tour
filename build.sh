@@ -1,9 +1,7 @@
 #!/bin/bash
-# Install dependencies with flag to allow installation in managed environment
+# Install dependencies
 pip install -r requirements.txt --break-system-packages
+
+# Collect static files only — NO database operations during build
+# Database operations (migrate, seed) happen at runtime via Vercel
 python manage.py collectstatic --noinput
-python manage.py migrate
-# Safely seed initial data (only runs if DB is empty)
-python manage.py seed_tour
-# Attempt to create superuser
-python manage.py createsuperuser --noinput || true

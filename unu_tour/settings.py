@@ -33,6 +33,12 @@ DEBUG = os.getenv('DEBUG', 'False') == 'True'
 # Allowed hosts from environment variable
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
 
+# Auto-add Vercel domains — supports production + all preview deployments
+ALLOWED_HOSTS += [
+    'unujogja-tour-backend.vercel.app',       # Production
+    '.vercel.app',                             # All Vercel preview/branch URLs (wildcard)
+]
+
 
 # Application definition
 
