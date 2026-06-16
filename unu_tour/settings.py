@@ -178,13 +178,13 @@ AWS_S3_ENDPOINT_URL = os.getenv('AWS_S3_ENDPOINT_URL', '').strip()
 
 # Use S3 storage ONLY if USE_LOCAL_DB is False AND credentials exist
 if not USE_LOCAL_DB and AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY and AWS_STORAGE_BUCKET_NAME and AWS_S3_ENDPOINT_URL:
-    # Parse project ID from S3 endpoint for constructing public URL
-    # Endpoint format: https://<project_id>.storage.supabase.co
+    # Extract project ref from S3 endpoint
+    # Endpoint format: https://<project_ref>.supabase.co/storage/v1/s3
     try:
-        project_id = AWS_S3_ENDPOINT_URL.split('//')[1].split('.')[0]
-        supabase_public_domain = f"{project_id}.supabase.co/storage/v1/object/public/{AWS_STORAGE_BUCKET_NAME}"
+        project_ref = AWS_S3_ENDPOINT_URL.split('//')[1].split('.supabase.co')[0]
+        # Public URL: https://<project_ref>.supabase.co/storage/v1/object/public/<bucket>
+        supabase_public_domain = f"{project_ref}.supabase.co/storage/v1/object/public/{AWS_STORAGE_BUCKET_NAME}"
     except Exception:
-        # Fallback if URL parsing fails (shouldn't happen with valid Supabase format)
         supabase_public_domain = None
 
     STORAGES = {
@@ -195,23 +195,23 @@ if not USE_LOCAL_DB and AWS_ACCESS_KEY_ID and AWS_SECRET_ACCESS_KEY and AWS_STOR
                 "secret_key": AWS_SECRET_ACCESS_KEY,
                 "bucket_name": AWS_STORAGE_BUCKET_NAME,
                 "endpoint_url": AWS_S3_ENDPOINT_URL,
-                "location": "media",  # REMOVED: Don't nest media/media
+                # NO "location" — files are stored as panoramas/... and thumbnails/... directly
                 "file_overwrite": False,
-                "default_acl": "public-read", 
+                "default_acl": "public-read",
                 "querystring_auth": False,
-                "custom_domain": supabase_public_domain, # Use calculated public domain
+                "custom_domain": supabase_public_domain,
             },
         },
         "staticfiles": {
             "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
         },
     }
-    
-    # Update MEDIA_URL to match custom_domain + location logic checking
+
+    # MEDIA_URL points to the public Supabase Storage URL
     if supabase_public_domain:
-         MEDIA_URL = f"https://{supabase_public_domain}/"
+        MEDIA_URL = f"https://{supabase_public_domain}/"
     else:
-         MEDIA_URL = f"{AWS_S3_ENDPOINT_URL}/storage/v1/object/public/{AWS_STORAGE_BUCKET_NAME}/"
+        MEDIA_URL = f"{AWS_S3_ENDPOINT_URL}/storage/v1/object/public/{AWS_STORAGE_BUCKET_NAME}/"
 
     print(f"[STORAGE] Using Supabase S3 Storage. Public URL: {MEDIA_URL}")
 else:

@@ -1,0 +1,43 @@
+name: Keep Supabase Alive
+
+on:
+  schedule:
+    # Ping setiap 4 hari sekali jam 08:00 WIB (01:00 UTC)
+    # Supabase pause setelah 7 hari tidak aktif — 4 hari = aman
+    - cron: '0 1 */4 * *'
+  workflow_dispatch: # Trigger manual dari GitHub Actions tab
+
+jobs:
+  ping-supabase:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ping Supabase REST API directly
+        env:
+          SUPABASE_URL: https://rpikshuompxholkdpfuo.supabase.co
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          echo "Pinging Supabase directly..."
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            -H "apikey: ${SUPABASE_ANON_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
+            "${SUPABASE_URL}/rest/v1/tour_api_scene?select=id&limit=1")
+          echo "Supabase response: $STATUS"
+          if [ "$STATUS" -ge 200 ] && [ "$STATUS" -lt 400 ]; then
+            echo "✅ Supabase is alive! Status: $STATUS"
+          else
+            echo "❌ Supabase ping failed with status: $STATUS"
+            exit 1
+          fi
+
+      - name: Ping Vercel Backend (secondary)
+        run: |
+          echo "Pinging Vercel backend..."
+          STATUS=$(curl -s -o /dev/null -w "%{http_code}" \
+            --max-time 30 \
+            https://unujogja-tour-backend.vercel.app/api/scenes/featured/)
+          echo "Vercel response: $STATUS"
+          if [ "$STATUS" -ge 200 ] && [ "$STATUS" -lt 500 ]; then
+            echo "✅ Vercel backend alive! Status: $STATUS"
+          else
+            echo "⚠️ Vercel ping returned: $STATUS (non-critical)"
+          fi

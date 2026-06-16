@@ -69,6 +69,7 @@ const PSViewer = ({ initialData }: PSViewerProps) => {
 
         return (scene.hotspots || []).map(h => ({
             id: `hotspot-${h.id}`,
+            // DB stores degrees (from Pannellum admin editor), convert to radians for PSV
             position: { yaw: h.yaw * (Math.PI / 180), pitch: h.pitch * (Math.PI / 180) },
             image: h.hotspot_type === 'scene' ? arrowSvg : infoSvg,
             size: { width: h.hotspot_type === 'scene' ? 80 : 50, height: h.hotspot_type === 'scene' ? 80 : 50 },
